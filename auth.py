@@ -6,11 +6,12 @@ from app import models
 router = APIRouter()
 
 # Request body models
-class UserRegister(BaseModel):
-    username: str
+class UserLogin(BaseModel):
     email: str
     password: str
-    role: str
+    role: str   # 👈 role is required
+
+
 
 class UserLogin(BaseModel):
     email: str
