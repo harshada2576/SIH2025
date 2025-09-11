@@ -110,7 +110,59 @@
     const sampleDoctors = [
       {id: 1, name: "Dr. Sarah Johnson", specialty: "Cardiologist", rating: 4.8, patients: 1250, qualification: "MBBS, MD Cardiology", experience: "15 years", location: "Downtown Medical Center", avatar: "👩‍⚕️", about: "Specialized in heart diseases and cardiac surgery.", availability: "Available Today"},
       {id: 2, name: "Dr. Michael Chen", specialty: "Dermatologist", rating: 4.9, patients: 980, qualification: "MBBS, MD Dermatology", experience: "12 years", location: "Skin Care Clinic", avatar: "👨‍⚕️", about: "Expert in skin conditions, cosmetic procedures.", availability: "Available Tomorrow"},
-      {id: 3, name: "Dr. Emily Rodriguez", specialty: "Pediatrician", rating: 4.7, patients: 2100, qualification: "MBBS, MD Pediatrics", experience: "10 years", location: "Children's Hospital", avatar: "👩‍⚕️", about: "Comprehensive healthcare for children.", availability: "Available Today"}
+      {id: 3, name: "Dr. Emily Rodriguez", specialty: "Pediatrician", rating: 4.7, patients: 2100, qualification: "MBBS, MD Pediatrics", experience: "10 years", location: "Children's Hospital", avatar: "👩‍⚕️", about: "Comprehensive healthcare for children.", availability: "Available Today"},
+      {
+                id: 4,
+                name: "Dr. David Kim",
+                specialty: "Orthopedist",
+                rating: 4.6,
+                patients: 850,
+                qualification: "MBBS, MS Orthopedics",
+                experience: "18 years",
+                location: "Bone & Joint Center",
+                avatar: "👨‍⚕️",
+                about: "Specializes in bone, joint, and muscle disorders with advanced surgical techniques.",
+                availability: "Available Today"
+            },
+            {
+                id: 5,
+                name: "Dr. Lisa Thompson",
+                specialty: "Gynecologist",
+                rating: 4.8,
+                patients: 1400,
+                qualification: "MBBS, MD Gynecology",
+                experience: "14 years",
+                location: "Women's Health Clinic",
+                avatar: "👩‍⚕️",
+                about: "Comprehensive women's healthcare including pregnancy care and reproductive health.",
+                availability: "Available Tomorrow"
+            },
+            {
+                id: 6,
+                name: "Dr. Robert Wilson",
+                specialty: "Neurologist",
+                rating: 4.9,
+                patients: 750,
+                qualification: "MBBS, DM Neurology",
+                experience: "20 years",
+                location: "Brain & Spine Institute",
+                avatar: "👨‍⚕️",
+                about: "Expert in neurological disorders, brain conditions, and nervous system diseases.",
+                availability: "Available Today"
+            },
+            {
+                id: 7,
+                name: "Dr. Amanda Davis",
+                specialty: "Ophthalmologist",
+                rating: 4.7,
+                patients: 1100,
+                qualification: "MBBS, MS Ophthalmology",
+                experience: "11 years",
+                location: "Eye Care Center",
+                avatar: "👩‍⚕️",
+                about: "Specialized in eye care, vision correction, and advanced eye surgeries.",
+                availability: "Available Today"
+            }
     ];
 
     async function fetchDoctorsFromBackend(page = 1, searchTerm = '') {
