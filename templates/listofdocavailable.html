@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Profiles - HealthCare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .doctor-card {
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+    .doctor-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .search-bar {
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .mobile-container {
+      width: 100%;
+      max-width: 480px;   /* fits larger phones too */
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    .star-rating { color: #fbbf24; }
+    .avatar-gradient-1 { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
+    .avatar-gradient-2 { background: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);}
+    .avatar-gradient-3 { background: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);}
+    .avatar-gradient-4 { background: linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);}
+    .avatar-gradient-5 { background: linear-gradient(135deg,#fa709a 0%,#fee140 100%);}
+    .avatar-gradient-6 { background: linear-gradient(135deg,#a8edea 0%,#fed6e3 100%);}
+    .avatar-gradient-7 { background: linear-gradient(135deg,#ff9a9e 0%,#fecfef 100%);}
+    .avatar-gradient-8 { background: linear-gradient(135deg,#a18cd1 0%,#fbc2eb 100%);}
+    .scroll-container {
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .scroll-container::-webkit-scrollbar {display: none;}
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-2">
+  <div class="mobile-container mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <div class="px-4 sm:px-6 pt-6 pb-4">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Find Doctors</h1>
+          <p class="text-gray-600 text-sm">Discover healthcare professionals</p>
+        </div>
+        <button onclick="refreshDoctors()" class="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">
+          <i id="refreshIcon" class="fas fa-sync-alt text-blue-600"></i>
+        </button>
+      </div>
+      <!-- Search Bar -->
+      <div class="search-bar rounded-2xl p-3 sm:p-4 mb-4">
+        <div class="flex items-center space-x-3">
+          <i class="fas fa-search text-gray-400 text-lg"></i>
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Search doctors by name or specialty..."
+            class="flex-1 bg-transparent text-gray-700 placeholder-gray-400 focus:outline-none text-sm"
+            oninput="filterDoctors()"
+          >
+          <button onclick="clearSearch()" id="clearBtn" class="hidden text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Results Counter -->
+      <div class="flex items-center justify-between text-xs sm:text-sm text-gray-600 mb-4">
+        <div class="flex items-center space-x-2">
+          <span id="resultsCount">Loading doctors...</span>
+          <span id="demoIndicator" class="hidden bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">Demo Mode</span>
+        </div>
+        <span id="lastUpdated" class="text-xs"></span>
+      </div>
+    </div>
+    <!-- Doctor Profiles List -->
+    <div class="scroll-container px-4 sm:px-6 pb-6 flex-1">
+      <div id="doctorsList" class="space-y-4"></div>
+      <!-- No Results Message -->
+      <div id="noResults" class="hidden text-center py-12">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-search text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">No doctors found</h3>
+        <p class="text-gray-500 text-sm">Try adjusting your search criteria</p>
+      </div>
+      <!-- Load More Button -->
+      <div id="loadMoreContainer" class="hidden text-center mt-6">
+        <button onclick="loadMoreDoctors()" id="loadMoreBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors">
+          Load More Doctors
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allDoctors = [];
+    let filteredDoctors = [];
+    let currentPage = 1;
+    const doctorsPerPage = 10;
+
+    const sampleDoctors = [
+      {id: 1, name: "Dr. Sarah Johnson", specialty: "Cardiologist", rating: 4.8, patients: 1250, qualification: "MBBS, MD Cardiology", experience: "15 years", location: "Downtown Medical Center", avatar: "👩‍⚕️", about: "Specialized in heart diseases and cardiac surgery.", availability: "Available Today"},
+      {id: 2, name: "Dr. Michael Chen", specialty: "Dermatologist", rating: 4.9, patients: 980, qualification: "MBBS, MD Dermatology", experience: "12 years", location: "Skin Care Clinic", avatar: "👨‍⚕️", about: "Expert in skin conditions, cosmetic procedures.", availability: "Available Tomorrow"},
+      {id: 3, name: "Dr. Emily Rodriguez", specialty: "Pediatrician", rating: 4.7, patients: 2100, qualification: "MBBS, MD Pediatrics", experience: "10 years", location: "Children's Hospital", avatar: "👩‍⚕️", about: "Comprehensive healthcare for children.", availability: "Available Today"}
+    ];
+
+    async function fetchDoctorsFromBackend(page = 1, searchTerm = '') {
+      try {
+        const params = new URLSearchParams({ page, limit: doctorsPerPage, search: searchTerm || '' });
+        const response = await fetch(`http://localhost:8000/api/doctors?${params}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        return {
+          doctors: data.data.doctors || [],
+          totalCount: data.data.total_count || 0,
+          hasMore: data.data.has_more || false,
+          currentPage: data.data.current_page || page,
+          totalPages: data.data.total_pages || 1,
+          lastUpdated: data.data.last_updated || new Date().toISOString(),
+          serverTime: data.timestamp || new Date().toISOString()
+        };
+      } catch (error) {
+        let filteredData = sampleDoctors;
+        if (searchTerm) {
+          filteredData = sampleDoctors.filter(d =>
+            d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            d.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            d.qualification.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        }
+        const startIndex = (page - 1) * doctorsPerPage;
+        const endIndex = startIndex + doctorsPerPage;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        return {
+          doctors: paginatedData,
+          totalCount: filteredData.length,
+          hasMore: endIndex < filteredData.length,
+          currentPage: page,
+          totalPages: Math.ceil(filteredData.length / doctorsPerPage),
+          lastUpdated: new Date().toISOString(),
+          serverTime: new Date().toISOString(),
+          isDemo: true
+        };
+      }
+    }
+
+    async function loadDoctors(page = 1, searchTerm = '', append = false) {
+      const data = await fetchDoctorsFromBackend(page, searchTerm);
+      if (append) allDoctors = [...allDoctors, ...data.doctors];
+      else allDoctors = data.doctors;
+      filteredDoctors = allDoctors;
+      displayDoctors(filteredDoctors);
+      updateResultsCount(data.totalCount, data.currentPage, data.totalPages);
+      updateLastUpdated(data.lastUpdated, data.serverTime);
+      if (data.isDemo) showDemoIndicator(); else hideDemoIndicator();
+      const loadMoreContainer = document.getElementById('loadMoreContainer');
+      if (data.hasMore && !searchTerm) {
+        loadMoreContainer.classList.remove('hidden');
+        updateLoadMoreButton(data.currentPage, data.totalPages);
+      } else loadMoreContainer.classList.add('hidden');
+    }
+
+    function displayDoctors(doctors) {
+      const doctorsList = document.getElementById('doctorsList');
+      const noResults = document.getElementById('noResults');
+      if (doctors.length === 0) {
+        doctorsList.innerHTML = '';
+        noResults.classList.remove('hidden');
+        return;
+      }
+      noResults.classList.add('hidden');
+      doctorsList.innerHTML = '';
+      doctors.forEach((doctor, index) => {
+        const card = document.createElement('div');
+        card.className = 'doctor-card bg-white rounded-2xl p-4 border border-gray-100';
+        card.innerHTML = `
+          <div class="flex items-start space-x-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 avatar-gradient-${(doctor.id % 8) + 1} rounded-full flex items-center justify-center text-xl sm:text-2xl">
+              ${doctor.avatar}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-start justify-between mb-2">
+                <div>
+                  <h3 class="font-semibold text-gray-800 text-base sm:text-lg">${doctor.name}</h3>
+                  <p class="text-blue-600 text-xs sm:text-sm font-medium">${doctor.specialty}</p>
+                </div>
+                <div class="text-right">
+                  <div class="flex items-center space-x-1 mb-1 text-xs sm:text-sm">
+                    <i class="fas fa-star star-rating"></i>
+                    <span class="text-gray-700 font-medium">${doctor.rating}</span>
+                  </div>
+                  <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">${doctor.availability}</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 mb-3 text-xs sm:text-sm text-gray-600">
+                <div class="flex items-center space-x-1">
+                  <i class="fas fa-users text-xs"></i>
+                  <span>${doctor.patients.toLocaleString()} patients</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <i class="fas fa-graduation-cap text-xs"></i>
+                  <span>${doctor.qualification}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 truncate">
+                  <i class="fas fa-map-marker-alt mr-1"></i>
+                  ${doctor.location}
+                </div>
+                <button onclick="window.location.href = 'docinfo.html?id=${doctor.id}'" class="bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors">
+                  Read More
+                </button>
+              </div>
+            </div>
+          </div>`;
+        doctorsList.appendChild(card);
+      });
+    }
+
+    async function filterDoctors() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      const clearBtn = document.getElementById('clearBtn');
+      if (searchTerm.length > 0) {
+        clearBtn.classList.remove('hidden');
+        currentPage = 1;
+        await loadDoctors(1, searchTerm);
+        document.getElementById('loadMoreContainer').classList.add('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+        currentPage = 1;
+        await loadDoctors(1, '');
+      }
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearBtn').classList.add('hidden');
+      loadDoctors(1, '');
+    }
+
+    function loadMoreDoctors() {
+      currentPage++;
+      loadDoctors(currentPage, '', true);
+    }
+
+    function refreshDoctors() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      refreshIcon.classList.add('animate-spin');
+      currentPage = 1;
+      loadDoctors(1, '').finally(() => {
+        refreshIcon.classList.remove('animate-spin');
+      });
+    }
+
+    function updateResultsCount(totalCount, currentPage = 1, totalPages = 1) {
+      const resultsElement = document.getElementById('resultsCount');
+      if (totalCount === 0) resultsElement.textContent = 'No doctors found';
+      else if (totalCount === 1) resultsElement.textContent = '1 doctor found';
+      else {
+        resultsElement.textContent = `${totalCount.toLocaleString()} doctors found`;
+        if (totalPages > 1) resultsElement.textContent += ` (Page ${currentPage} of ${totalPages})`;
+      }
+    }
+
+    function updateLastUpdated(backendTime = null, serverTime = null) {
+      const lastUpdatedElement = document.getElementById('lastUpdated');
+      try {
+        let displayTime;
+        if (backendTime) displayTime = new Date(backendTime).toLocaleTimeString();
+        else if (serverTime) displayTime = new Date(serverTime).toLocaleTimeString();
+        else displayTime = new Date().toLocaleTimeString();
+        lastUpdatedElement.textContent = `Updated ${displayTime}`;
+      } catch (error) {
+        lastUpdatedElement.textContent = 'Updated just now';
+      }
+    }
+
+    function showDemoIndicator() { document.getElementById('demoIndicator').classList.remove('hidden'); }
+    function hideDemoIndicator() { document.getElementById('demoIndicator').classList.add('hidden'); }
+    function updateLoadMoreButton(currentPage, totalPages) {
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      if (loadMoreBtn) loadMoreBtn.textContent = `Load More (Page ${currentPage + 1} of ${totalPages})`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDoctors();
+    });
+  </script>
+</body>
+</html>
