@@ -7,7 +7,7 @@ app = FastAPI()
 
 # Template and static file setup
 templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Dummy user for demonstration
 DUMMY_USER = {
