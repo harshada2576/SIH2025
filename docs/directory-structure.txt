@@ -1,0 +1,65 @@
+SIH2025/
+├── app/                          # Backend application logic
+│   ├── api/                      # All API routes
+│   │   ├── deps.py
+│   │   ├── endpoints/
+│   │   │   ├── admin.py
+│   │   │   ├── appointments.py
+│   │   │   ├── auth.py
+│   │   │   ├── doctor.py
+│   │   │   └── login.py
+│   │   └── __init__.py
+│   ├── core/                     # Core config and security
+│   │   ├── config.py
+│   │   ├── security.py
+│   │   └── __init__.py
+│   ├── crud/                     # DB interaction logic
+│   │   ├── appointment.py
+│   │   ├── doctor.py
+│   │   ├── user.py
+│   │   └── __init__.py
+│   ├── db/                       # Database init and models
+│   │   ├── database.py
+│   │   └── models/
+│   │       ├── appointment.py
+│   │       ├── doctor.py
+│   │       ├── user.py
+│   │       └── __init__.py
+│   ├── schemas/                  # Pydantic models
+│   │   ├── appointment.py
+│   │   ├── doctor.py
+│   │   ├── user.py
+│   │   └── __init__.py
+│   ├── services/                 # Utility functions
+│   │   ├── file_upload.py
+│   │   └── __init__.py
+│   ├── main.py                   # Entry point: FastAPI app
+│   └── __init__.py
+│
+├── frontend/                     # Frontend static files
+│   ├── static/                   # CSS, JS, Images
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── assets/
+│   └── templates/                # HTML templates
+│       ├── login.html
+│       └── register.html
+│
+├── uploads/                      # User-uploaded files
+│
+├── tests/                        # Backend test cases
+│   ├── test_auth.py
+│   ├── test_doctor.py
+│   └── __init__.py
+│
+├── scripts/                      # Shell scripts, deployment
+│   └── run.sh
+│
+├── docs/                         # Documentation, PPTs
+│   ├── README.md
+│   └── architecture.png
+│
+├── requirements.txt              # Python dependencies
+├── LICENSE
+└── README.md                     # Short overview (keep here)
+
