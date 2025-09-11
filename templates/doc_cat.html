@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthCare Mobile App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-out',
+            'scale-in': 'scaleIn 0.4s ease-out',
+            'bounce-gentle': 'bounceGentle 0.6s ease-out'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes scaleIn { from {transform:scale(0.8); opacity:0;} to {transform:scale(1); opacity:1;} }
+    @keyframes bounceGentle { 0%{transform:scale(0.9);} 50%{transform:scale(1.05);} 100%{transform:scale(1);} }
+    .category-icon { transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);}
+    .category-icon:hover { transform: translateY(-5px) scale(1.05); box-shadow:0 8px 25px rgba(0,0,0,0.15);}
+    .category-icon:active { transform: translateY(-2px) scale(0.98);}
+    .search-bar { background: linear-gradient(145deg,#fff,#f8fafc); box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+    .gradient-pink{background:linear-gradient(135deg,#fce7f3,#f9a8d4);}
+    .gradient-purple{background:linear-gradient(135deg,#e9d5ff,#c084fc);}
+    .gradient-green{background:linear-gradient(135deg,#dcfce7,#86efac);}
+    .gradient-yellow{background:linear-gradient(135deg,#fef3c7,#fcd34d);}
+    .gradient-red{background:linear-gradient(135deg,#fee2e2,#fca5a5);}
+    .gradient-orange{background:linear-gradient(135deg,#fed7aa,#fb923c);}
+    .mobile-container{max-width:375px; min-height:100vh; background:linear-gradient(180deg,#f8fafc 0%,#fff 100%);}
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+  <!-- Mobile App Container -->
+  <div class="mobile-container mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-6 pt-8 pb-6">
+      <div class="text-center mb-8 animate-fade-in">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">HealthCare</h1>
+        <p class="text-gray-600 text-sm">Find the right care for you</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar rounded-2xl p-4 mb-8 animate-scale-in">
+        <div class="flex items-center space-x-3">
+          <i class="fas fa-search text-gray-400 text-lg"></i>
+          <input 
+            type="text" id="searchInput"
+            placeholder="Search doctors, symptoms, treatments..."
+            class="flex-1 bg-transparent text-gray-700 placeholder-gray-400 focus:outline-none text-sm"
+            onkeyup="searchDoctors(event)"
+            oninput="showSearchSuggestions()"
+          >
+          <button onclick="handleVoiceSearch()" class="text-gray-400 hover:text-blue-500 transition-colors">
+            <i class="fas fa-microphone text-lg"></i>
+          </button>
+        </div>
+        <!-- Search Results -->
+        <div id="searchResults" class="hidden mt-4 bg-white rounded-xl shadow-lg border border-gray-100 max-h-60 overflow-y-auto">
+          <div class="p-3">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Available Doctors</h4>
+            <div id="doctorsList" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical Categories Grid -->
+    <div class="px-6 pb-8">
+      <h2 class="text-lg font-semibold text-gray-800 mb-6">Medical Categories</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div onclick="openCategory('general')" class="category-icon gradient-pink rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-stethoscope text-pink-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">General Medicine</h3>
+            <p class="text-xs text-gray-600">Primary care</p>
+          </div>
+        </div>
+        <div onclick="openCategory('dental')" class="category-icon gradient-purple rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-tooth text-purple-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Dental Health</h3>
+            <p class="text-xs text-gray-600">Oral care</p>
+          </div>
+        </div>
+        <div onclick="openCategory('eye')" class="category-icon gradient-green rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-eye text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Eye Care</h3>
+            <p class="text-xs text-gray-600">Vision health</p>
+          </div>
+        </div>
+        <div onclick="openCategory('ear')" class="category-icon gradient-yellow rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-assistive-listening-systems text-yellow-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Ear Care</h3>
+            <p class="text-xs text-gray-600">Hearing health</p>
+          </div>
+        </div>
+        <div onclick="openCategory('prenatal')" class="category-icon gradient-red rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-baby text-red-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Prenatal Care</h3>
+            <p class="text-xs text-gray-600">Pregnancy care</p>
+          </div>
+        </div>
+        <div onclick="openCategory('cardiology')" class="category-icon gradient-orange rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <i class="fas fa-heartbeat text-orange-600 text-2xl"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Cardiology</h3>
+            <p class="text-xs text-gray-600">Heart health</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="px-6 pb-6">
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1">Need immediate help?</h3>
+            <p class="text-xs text-gray-600">24/7 emergency support</p>
+          </div>
+          <button onclick="callEmergency()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+            <i class="fas fa-phone mr-1"></i> Emergency
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-4 right-4 bg-white border border-gray-200 rounded-xl shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 max-w-sm">
+    <div class="flex items-center space-x-3">
+      <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center">
+        <i class="fas fa-check text-white"></i>
+      </div>
+      <div>
+        <p id="toastTitle" class="font-medium text-gray-800 text-sm"></p>
+        <p id="toastMessage" class="text-xs text-gray-600"></p>
+      </div>
+      <button onclick="hideToast()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Auth & user setup
+    const authToken = localStorage.getItem("authToken") || "demo-auth-token";
+    const apiKey = "your-api-key";
+    const userId = localStorage.getItem("userId") || "guest_user";
+
+    // Get GPS location
+    function getUserLocation() {
+      return new Promise((resolve) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve({ lat: null, lng: null })
+          );
+        } else {
+          resolve({ lat: null, lng: null });
+        }
+      });
+    }
+
+    // Category selection
+    async function openCategory(category) {
+      const categories = {
+        general: { name: "General Medicine", description: "Primary care and family medicine" },
+        dental: { name: "Dental Health", description: "Oral care and dental treatments" },
+        eye: { name: "Eye Care", description: "Vision health and ophthalmology" },
+        ear: { name: "Ear Care", description: "Hearing health and ENT services" },
+        prenatal: { name: "Prenatal Care", description: "Pregnancy care and obstetrics" },
+        cardiology: { name: "Cardiology", description: "Heart health and cardiac care" }
+      };
+
+      const categoryData = categories[category];
+      showToast("Loading...", `Connecting to ${categoryData.name} services...`, "info");
+
+      const location = await getUserLocation();
+      const requestData = {
+        category,
+        categoryName: categoryData.name,
+        description: categoryData.description,
+        timestamp: new Date().toISOString(),
+        userId,
+        location,
+        requestType: "category_selection"
+      };
+
+      try {
+        const response = await fetch("https://api.healthcare-app.com/categories/select", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`,
+            "X-API-Key": apiKey
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          showToast("Success!", `Found ${result.doctorCount || "25+"} ${categoryData.name} specialists near you`, "success");
+          setTimeout(() => displayCategoryDoctors(category, result.doctors || []), 1000);
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error("Backend API Error:", error);
+        showToast("Demo Mode", `Showing sample ${categoryData.name} doctors (Backend unavailable)`, "warning");
+        const demoResponse = { doctorCount: Math.floor(Math.random()*20)+10, doctors: getDoctorsByCategory(category), success:true };
+        setTimeout(() => displayCategoryDoctors(category, demoResponse.doctors), 1000);
+      }
+    }
+
+    // Demo doctor list
+    const doctors = [
+      { name: "Dr. Sarah Johnson", specialty: "Cardiologist", rating: 4.8, experience: "15 years", location: "Downtown Medical Center" },
+      { name: "Dr. Michael Chen", specialty: "Dermatologist", rating: 4.9, experience: "12 years", location: "Skin Care Clinic" },
+      { name: "Dr. Emily Rodriguez", specialty: "Pediatrician", rating: 4.7, experience: "10 years", location: "Children's Hospital" },
+      { name: "Dr. David Kim", specialty: "Orthopedist", rating: 4.6, experience: "18 years", location: "Bone & Joint Center" },
+      { name: "Dr. Lisa Thompson", specialty: "Gynecologist", rating: 4.8, experience: "14 years", location: "Women's Health Clinic" },
+      { name: "Dr. Robert Wilson", specialty: "Neurologist", rating: 4.9, experience: "20 years", location: "Brain & Spine Institute" },
+      { name: "Dr. Amanda Davis", specialty: "Ophthalmologist", rating: 4.7, experience: "11 years", location: "Eye Care Center" },
+      { name: "Dr. James Brown", specialty: "ENT Specialist", rating: 4.6, experience: "16 years", location: "Hearing & Balance Clinic" },
+      { name: "Dr. Maria Garcia", specialty: "Dentist", rating: 4.8, experience: "13 years", location: "Smile Dental Care" },
+      { name: "Dr. Kevin Lee", specialty: "General Medicine", rating: 4.5, experience: "8 years", location: "Family Health Center" }
+    ];
+
+    function getDoctorsByCategory(category) {
+      const categoryDoctors = {
+        general: doctors.filter(d => d.specialty.includes("General") || d.specialty.includes("Family")),
+        dental: doctors.filter(d => d.specialty.includes("Dentist")),
+        eye: doctors.filter(d => d.specialty.includes("Ophthalmologist")),
+        ear: doctors.filter(d => d.specialty.includes("ENT")),
+        prenatal: doctors.filter(d => d.specialty.includes("Gynecologist") || d.specialty.includes("Obstetrician")),
+        cardiology: doctors.filter(d => d.specialty.includes("Cardiologist"))
+      };
+      return categoryDoctors[category] || doctors.slice(0, 3);
+    }
+
+    // Show doctors in list
+    function displayCategoryDoctors(category, doctorsList) {
+      const searchResults = document.getElementById("searchResults");
+      const doctorsListElement = document.getElementById("doctorsList");
+      if (doctorsList.length===0) { showToast("No Results","No doctors found in this category.","warning"); return; }
+      doctorsListElement.innerHTML="";
+      const headerElement=document.createElement("div");
+      headerElement.className="mb-3 pb-2 border-b border-gray-200";
+      headerElement.innerHTML=`<h4 class="text-sm font-semibold text-gray-700">${category} Specialists</h4><p class="text-xs text-gray-500">${doctorsList.length} doctors available</p>`;
+      doctorsListElement.appendChild(headerElement);
+      doctorsList.forEach(doctor=>{
+        const doctorElement=document.createElement("div");
+        doctorElement.className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors border border-gray-100 mb-2";
+        doctorElement.onclick=()=>selectDoctorFromCategory(doctor,category);
+        doctorElement.innerHTML=`
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-md text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h5 class="font-semibold text-gray-800 text-sm">${doctor.name}</h5>
+            <p class="text-xs text-gray-600">${doctor.specialty}</p>
+            <p class="text-xs text-gray-500">${doctor.location}</p>
+          </div>
+          <div class="text-right">
+            <button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-600 transition-colors">Book Now</button>
+          </div>`;
+        doctorsListElement.appendChild(doctorElement);
+      });
+      searchResults.classList.remove("hidden");
+    }
+
+    // Doctor selection
+    
+          // Doctor selection
+    async function selectDoctorFromCategory(doctor, category) {
+      const location = await getUserLocation();
+
+      const selectionData = {
+        doctorId: doctor.id || `doc_${Math.random().toString(36).substr(2, 9)}`,
+        doctorName: doctor.name,
+        specialty: doctor.specialty,
+        category,
+        action: "doctor_selected",
+        timestamp: new Date().toISOString(),
+        userId,
+        location
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/categories/select", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`,
+            "X-API-Key": apiKey
+          },
+          body: JSON.stringify(selectionData)
+        });
+
+        if (response.ok) {
+          showToast("Doctor Selected", `${doctor.name} selected. Redirecting to booking...`, "success");
+        } else {
+          throw new Error("Selection failed");
+        }
+      } catch (error) {
+        console.error("Selection API Error:", error);
+        showToast("Demo Mode", `${doctor.name} selected (Demo mode)`, "success");
+      }
+
+      document.getElementById("searchResults").classList.add("hidden");
+      document.getElementById("searchInput").value = doctor.name;
+    }
+
+    // Search functions
+    function searchDoctors(event) {
+      const searchTerm = event.target.value.toLowerCase().trim();
+      const searchResults = document.getElementById("searchResults");
+      const doctorsList = document.getElementById("doctorsList");
+
+      if (searchTerm.length === 0) {
+        searchResults.classList.add("hidden");
+        return;
+      }
+
+      if (event.key === "Enter") {
+        performSearch(searchTerm);
+        return;
+      }
+
+      const filteredDoctors = doctors.filter(doctor =>
+        doctor.name.toLowerCase().includes(searchTerm) ||
+        doctor.specialty.toLowerCase().includes(searchTerm) ||
+        doctor.location.toLowerCase().includes(searchTerm)
+      );
+
+      if (filteredDoctors.length > 0) {
+        displaySearchResults(filteredDoctors);
+        searchResults.classList.remove("hidden");
+      } else {
+        searchResults.classList.add("hidden");
+      }
+    }
+
+    function displaySearchResults(filteredDoctors) {
+      const doctorsList = document.getElementById("doctorsList");
+      doctorsList.innerHTML = "";
+      filteredDoctors.slice(0, 5).forEach(doctor => {
+        const doctorElement = document.createElement("div");
+        doctorElement.className = "flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors";
+        doctorElement.onclick = () => selectDoctorFromCategory(doctor, doctor.specialty);
+        doctorElement.innerHTML = `
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-md text-blue-600"></i>
+          </div>
+          <div class="flex-1">
+            <h5 class="font-medium text-gray-800 text-sm">${doctor.name}</h5>
+            <p class="text-xs text-gray-600">${doctor.specialty} • ${doctor.location}</p>
+          </div>`;
+        doctorsList.appendChild(doctorElement);
+      });
+    }
+
+    function performSearch(searchTerm) {
+      document.getElementById("searchResults").classList.add("hidden");
+      showToast("Search Results", `Searching for "${searchTerm}"...`, "info");
+    }
+
+    function handleVoiceSearch() {
+      showToast("Voice Search", "Listening... Please describe your symptoms.", "info");
+    }
+
+    function callEmergency() {
+      showToast("Emergency Alert", "Connecting to emergency services...", "danger");
+    }
+
+    // Toast notification system
+    function showToast(title, message, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastIcon = document.getElementById("toastIcon");
+      const toastTitle = document.getElementById("toastTitle");
+      const toastMessage = document.getElementById("toastMessage");
+
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+
+      let iconClass = "fas fa-check", bgColor = "bg-green-500";
+      if (type === "danger") { iconClass="fas fa-exclamation-triangle"; bgColor="bg-red-500"; }
+      else if (type === "info") { iconClass="fas fa-info-circle"; bgColor="bg-blue-500"; }
+      else if (type === "warning") { iconClass="fas fa-exclamation-circle"; bgColor="bg-yellow-500"; }
+
+      toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center ${bgColor}`;
+      toastIcon.innerHTML = `<i class="${iconClass} text-white text-sm"></i>`;
+      toast.classList.remove("translate-x-full");
+
+      setTimeout(() => { hideToast(); }, 3500);
+    }
+
+    function hideToast() {
+      document.getElementById("toast").classList.add("translate-x-full");
+    }
+
+    // Init
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        showToast("Welcome to HealthCare", "Your personal health companion is ready!", "success");
+      }, 500);
+    });
+  </script>
+</body>
+</html>
+
