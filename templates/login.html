@@ -197,7 +197,7 @@
         }
 
         function goToRegister() {
-            window.location.href = 'registration.html';
+            window.location.href = 'register.html';
         }
 
         function showNotification(message, type) {
@@ -231,6 +231,47 @@
             document.getElementById('email').value = 'doctor@demo.com';
             document.getElementById('password').value = 'password123';
         });
+        async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("http://localhost:8000/api/login", { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                role: selectedRole
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem("token", result.token);
+            localStorage.setItem("userRole", selectedRole);
+            localStorage.setItem("userEmail", email);
+
+            showNotification("Login successful! Redirecting...", "success");
+
+            setTimeout(() => {
+                if (selectedRole === "patient") {
+                    window.location.href = "patient-portal.html";
+                } else {
+                    window.location.href = "doctor-portal.html";
+                }
+            }, 1500);
+        } else {
+            showNotification(result.message || "Invalid credentials", "error");
+        }
+    } catch (error) {
+        console.error("Error logging in:", error);
+        showNotification("Server error. Please try again later.", "error");
+    }
+}
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97bf4310a75f3b34',t:'MTc1NzM0MzA2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
