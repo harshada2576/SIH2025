@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blood Donor Registration - LifeSaver Blood Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#f0f9ff",
+                500: "#dc2626", // Red for blood donation theme
+                600: "#b91c1c",
+                700: "#991b1b",
+                800: "#7f1d1d",
+                900: "#631c1c",
+              },
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-in-out",
+              "slide-up": "slideUp 0.3s ease-out",
+              "pulse-slow": "pulse 3s infinite",
+              "bounce-in": "bounceIn 0.6s ease-out",
+            },
+          },
+        },
+      };
+
+      // Global variables
+      let currentStep = 1;
+      let totalSteps = 4;
+      let formData = {};
+      let isDarkMode = false;
+
+      // Initialize everything when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Blood donor registration form loaded");
+        updateProgressBar();
+        checkDarkMode();
+      });
+
+      // Dark mode functionality
+      function toggleDarkMode() {
+        console.log("Toggling dark mode...");
+        isDarkMode = !isDarkMode;
+        const html = document.documentElement;
+        const icon = document.getElementById("darkModeIcon");
+
+        if (isDarkMode) {
+          html.classList.add("dark");
+          icon.className = "fas fa-sun text-yellow-400";
+          localStorage.setItem("darkMode", "true");
+        } else {
+          html.classList.remove("dark");
+          icon.className = "fas fa-moon text-gray-600";
+          localStorage.setItem("darkMode", "false");
+        }
+      }
+
+      function checkDarkMode() {
+        const savedMode = localStorage.getItem("darkMode");
+        if (savedMode === "true") {
+          isDarkMode = true;
+          document.documentElement.classList.add("dark");
+          const icon = document.getElementById("darkModeIcon");
+          if (icon) icon.className = "fas fa-sun text-yellow-400";
+        }
+      }
+
+      // Step navigation
+      function nextStep() {
+        if (validateCurrentStep()) {
+          if (currentStep < totalSteps) {
+            hideStep(currentStep);
+            currentStep++;
+            showStep(currentStep);
+            updateProgressBar();
+            scrollToTop();
+          } else if (currentStep === totalSteps) {
+            submitRegistration();
+          }
+        }
+      }
+
+      function prevStep() {
+        if (currentStep > 1) {
+          hideStep(currentStep);
+          currentStep--;
+          showStep(currentStep);
+          updateProgressBar();
+          scrollToTop();
+        }
+      }
+
+      function goToStep(step) {
+        if (step >= 1 && step <= totalSteps) {
+          hideStep(currentStep);
+          currentStep = step;
+          showStep(currentStep);
+          updateProgressBar();
+          scrollToTop();
+        }
+      }
+
+      function showStep(step) {
+        const stepElement = document.getElementById(`step${step}`);
+        if (stepElement) {
+          stepElement.classList.remove("hidden");
+          stepElement.classList.add("active");
+        }
+      }
+
+      function hideStep(step) {
+        const stepElement = document.getElementById(`step${step}`);
+        if (stepElement) {
+          stepElement.classList.add("hidden");
+          stepElement.classList.remove("active");
+        }
+      }
+
+      function updateProgressBar() {
+        const progress = (currentStep / totalSteps) * 100;
+        const progressBar = document.getElementById("progressBar");
+        const progressText = document.getElementById("progressText");
+        const nextButton = document.getElementById("nextButton");
+
+        if (progressBar) {
+          progressBar.style.width = `${progress}%`;
+        }
+
+        if (progressText) {
+          progressText.textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+
+        if (nextButton) {
+          nextButton.textContent =
+            currentStep === totalSteps ? "Complete Registration" : "Next Step";
+        }
+
+        // Update step indicators
+        for (let i = 1; i <= totalSteps; i++) {
+          const indicator = document.getElementById(`stepIndicator${i}`);
+          if (indicator) {
+            if (i < currentStep) {
+              indicator.className =
+                "w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold";
+              indicator.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (i === currentStep) {
+              indicator.className =
+                "w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center text-sm font-semibold";
+              indicator.textContent = i;
+            } else {
+              indicator.className =
+                "w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-semibold";
+              indicator.textContent = i;
+            }
+          }
+        }
+      }
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Validation functions
+      function validateCurrentStep() {
+        const stepElement = document.getElementById(`step${currentStep}`);
+        if (!stepElement) return false;
+
+        const requiredFields = stepElement.querySelectorAll("[required]");
+        let isValid = true;
+
+        requiredFields.forEach((field) => {
+          if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add("border-red-500");
+            showFieldError(field, "This field is required");
+          } else {
+            field.classList.remove("border-red-500");
+            hideFieldError(field);
+          }
+        });
+
+        // Additional validation for specific steps
+        if (currentStep === 1) {
+          isValid = validateStep1() && isValid;
+        } else if (currentStep === 2) {
+          isValid = validateStep2() && isValid;
+        }
+
+        if (!isValid) {
+          showNotification(
+            "Please fill in all required fields correctly",
+            "error"
+          );
+        }
+
+        return isValid;
+      }
+
+      function validateStep1() {
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        let isValid = true;
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showFieldError(
+            document.getElementById("email"),
+            "Please enter a valid email address"
+          );
+          isValid = false;
+        }
+
+        // Phone validation
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+          showFieldError(
+            document.getElementById("phone"),
+            "Please enter a valid 10-digit mobile number"
+          );
+          isValid = false;
+        }
+
+        // Password validation
+        if (password.length < 8) {
+          showFieldError(
+            document.getElementById("password"),
+            "Password must be at least 8 characters long"
+          );
+          isValid = false;
+        }
+
+        // Confirm password validation
+        if (password !== confirmPassword) {
+          showFieldError(
+            document.getElementById("confirmPassword"),
+            "Passwords do not match"
+          );
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      function validateStep2() {
+        const dob = document.getElementById("dob").value;
+        const weight = document.getElementById("weight").value;
+        const lastDonationDate =
+          document.getElementById("lastDonationDate").value;
+
+        let isValid = true;
+
+        // DOB validation (age must be 18-65)
+        if (dob) {
+          const today = new Date();
+          const birthDate = new Date(dob);
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          if (age < 18 || age > 65) {
+            showFieldError(
+              document.getElementById("dob"),
+              "Donors must be between 18 and 65 years old"
+            );
+            isValid = false;
+          }
+        } else {
+          showFieldError(
+            document.getElementById("dob"),
+            "Date of birth is required"
+          );
+          isValid = false;
+        }
+
+        // Weight validation (must be at least 50kg)
+        if (weight < 50) {
+          showFieldError(
+            document.getElementById("weight"),
+            "Donors must weigh at least 50 kg"
+          );
+          isValid = false;
+        }
+
+        // Last donation date validation (must be at least 3 months ago)
+        if (lastDonationDate) {
+          const today = new Date();
+          const lastDate = new Date(lastDonationDate);
+          const threeMonthsAgo = new Date();
+          threeMonthsAgo.setMonth(today.getMonth() - 3);
+
+          if (lastDate > threeMonthsAgo) {
+            showFieldError(
+              document.getElementById("lastDonationDate"),
+              "Your last donation must be at least 3 months ago"
+            );
+            isValid = false;
+          }
+        }
+
+        return isValid;
+      }
+
+      function showFieldError(field, message) {
+        hideFieldError(field);
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "field-error text-red-500 text-sm mt-1";
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+      }
+
+      function hideFieldError(field) {
+        const existingError = field.parentNode.querySelector(".field-error");
+        if (existingError) {
+          existingError.remove();
+        }
+      }
+
+      // OTP functions
+      function sendOTP(type) {
+        const button = document.getElementById(`send${type}OTP`);
+        const input = document.getElementById(
+          type === "Phone" ? "phone" : "email"
+        );
+
+        if (!input.value) {
+          showNotification(
+            `Please enter your ${type.toLowerCase()} first`,
+            "error"
+          );
+          return;
+        }
+
+        button.disabled = true;
+        button.innerHTML =
+          '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+
+        // Simulate OTP sending
+        setTimeout(() => {
+          button.innerHTML = '<i class="fas fa-check mr-2"></i>OTP Sent';
+          button.className =
+            "bg-green-600 text-white px-4 py-2 rounded-lg text-sm";
+          showNotification(`OTP sent to your ${type.toLowerCase()}`, "success");
+
+          // Show OTP input
+          const otpDiv = document.getElementById(`${type.toLowerCase()}OTPDiv`);
+          if (otpDiv) {
+            otpDiv.classList.remove("hidden");
+          }
+        }, 2000);
+      }
+
+      function verifyOTP(type) {
+        const otpInput = document.getElementById(`${type.toLowerCase()}OTP`);
+        const button = document.getElementById(`verify${type}OTP`);
+
+        if (!otpInput.value || otpInput.value.length !== 6) {
+          showNotification("Please enter a valid 6-digit OTP", "error");
+          return;
+        }
+
+        button.disabled = true;
+        button.innerHTML =
+          '<i class="fas fa-spinner fa-spin mr-2"></i>Verifying...';
+
+        // Simulate OTP verification
+        setTimeout(() => {
+          button.innerHTML = '<i class="fas fa-check mr-2"></i>Verified';
+          button.className =
+            "bg-green-600 text-white px-4 py-2 rounded-lg text-sm";
+          otpInput.disabled = true;
+          showNotification(`${type} verified successfully`, "success");
+
+          // Add verified badge
+          const verifiedBadge = document.createElement("div");
+          verifiedBadge.className =
+            "flex items-center mt-2 text-green-600 dark:text-green-400 text-sm";
+          verifiedBadge.innerHTML =
+            '<i class="fas fa-check-circle mr-2"></i>Verified';
+          otpInput.parentNode.appendChild(verifiedBadge);
+        }, 1500);
+      }
+
+      // Password strength checker
+      function checkPasswordStrength(password) {
+        const strengthDiv = document.getElementById("passwordStrength");
+        if (!strengthDiv) return;
+
+        let strength = 0;
+        let message = "";
+        let className = "";
+
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        if (strength < 3) {
+          message = "Weak password";
+          className = "text-red-500";
+        } else if (strength < 4) {
+          message = "Medium strength";
+          className = "text-yellow-500";
+        } else {
+          message = "Strong password";
+          className = "text-green-500";
+        }
+
+        strengthDiv.textContent = message;
+        strengthDiv.className = `mt-2 text-sm ${className}`;
+      }
+
+      // Password match checker
+      function checkPasswordMatch() {
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+        const matchDiv = document.getElementById("passwordMatch");
+
+        if (!matchDiv) return;
+
+        if (confirmPassword === "") {
+          matchDiv.textContent = "";
+          return;
+        }
+
+        if (password === confirmPassword) {
+          matchDiv.textContent = "Passwords match";
+          matchDiv.className = "mt-2 text-sm text-green-500";
+        } else {
+          matchDiv.textContent = "Passwords do not match";
+          matchDiv.className = "mt-2 text-sm text-red-500";
+        }
+      }
+
+      // Password visibility toggle
+      function togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + "Icon");
+
+        if (input && icon) {
+          if (input.type === "password") {
+            input.type = "text";
+            icon.className = "fas fa-eye-slash";
+          } else {
+            input.type = "password";
+            icon.className = "fas fa-eye";
+          }
+        }
+      }
+
+      // Form submission
+      function submitRegistration() {
+        if (!validateCurrentStep()) {
+          return;
+        }
+
+        // Check agreements
+        const termsAgreed = document.getElementById("agreeTerms").checked;
+        const detailsConfirmed =
+          document.getElementById("confirmDetails").checked;
+        const eligibilityConfirmed =
+          document.getElementById("confirmEligibility").checked;
+
+        if (!termsAgreed || !detailsConfirmed || !eligibilityConfirmed) {
+          showNotification(
+            "Please agree to all terms and confirmations",
+            "error"
+          );
+          return;
+        }
+
+        // Show loading
+        showLoading();
+
+        // Simulate form submission
+        setTimeout(() => {
+          hideLoading();
+          showNotification(
+            "Blood donor registration successful! Thank you for your life-saving contribution.",
+            "success"
+          );
+
+          // Redirect to success page or login
+          setTimeout(() => {
+            window.location.href = "#thankyou";
+          }, 3000);
+        }, 3000);
+      }
+
+      // Notification system
+      function showNotification(message, type = "info") {
+        const container = document.getElementById("notificationContainer");
+        if (!container) return;
+
+        const notification = document.createElement("div");
+        notification.className = `notification-toast bg-white dark:bg-gray-800 border-l-4 p-4 rounded-lg shadow-xl`;
+
+        let borderColor = "border-blue-500";
+        let icon = "fas fa-info-circle text-blue-500";
+
+        if (type === "success") {
+          borderColor = "border-green-500";
+          icon = "fas fa-check-circle text-green-500";
+        } else if (type === "error") {
+          borderColor = "border-red-500";
+          icon = "fas fa-exclamation-circle text-red-500";
+        } else if (type === "warning") {
+          borderColor = "border-yellow-500";
+          icon = "fas fa-exclamation-triangle text-yellow-500";
+        }
+
+        notification.className += ` ${borderColor}`;
+
+        notification.innerHTML = `
+          <div class="flex items-center">
+            <i class="${icon} mr-3"></i>
+            <div class="flex-1">
+              <p class="text-gray-800 dark:text-white font-medium">${message}</p>
+            </div>
+            <button onclick="closeNotification(this)" class="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(notification);
+
+        // Show notification
+        setTimeout(() => {
+          notification.classList.add("show");
+        }, 100);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          closeNotification(notification.querySelector("button"));
+        }, 5000);
+      }
+
+      function closeNotification(button) {
+        const notification = button.closest(".notification-toast");
+        notification.classList.remove("show");
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }
+
+      // Loading overlay
+      function showLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          overlay.classList.remove("hidden");
+        }
+      }
+
+      function hideLoading() {
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          overlay.classList.add("hidden");
+        }
+      }
+    </script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .medical-gradient {
+        background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+      }
+
+      .step {
+        display: none;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      .step.active {
+        display: block;
+      }
+
+      .notification-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        transform: translateX(400px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 400px;
+      }
+
+      .notification-toast.show {
+        transform: translateX(0);
+      }
+
+      .progress-bar {
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ef4444, #b91c1c);
+        transition: width 0.3s ease;
+        border-radius: 3px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .time-slot-label {
+        transition: all 0.2s ease;
+      }
+
+      .time-slot-label:hover {
+        background-color: #f3f4f6;
+      }
+
+      .dark .time-slot-label:hover {
+        background-color: #374151;
+      }
+
+      @media (max-width: 768px) {
+        .notification-toast {
+          right: 10px;
+          left: 10px;
+          transform: translateY(-100px);
+        }
+        .notification-toast.show {
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-all duration-300"
+  >
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center hidden"
+    >
+      <div class="text-center">
+        <div
+          class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+        ></div>
+        <p class="text-gray-600 dark:text-gray-300 text-lg">
+          Processing your registration...
+        </p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">
+          Please wait while we verify your details
+        </p>
+      </div>
+    </div>
+
+    <div id="notificationContainer"></div>
+
+    <div class="fixed top-4 right-4 z-40">
+      <button
+        onclick="toggleDarkMode()"
+        class="bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700"
+      >
+        <i
+          id="darkModeIcon"
+          class="fas fa-moon text-gray-600 dark:text-yellow-400"
+        ></i>
+      </button>
+    </div>
+
+    <div class="min-h-screen py-8 px-4">
+      <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+          <div
+            class="medical-gradient w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <i class="fas fa-hand-holding-heart text-white text-3xl"></i>
+          </div>
+          <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+            Blood Donor Registration
+          </h1>
+          <p class="text-gray-600 dark:text-gray-300 text-lg">
+            Join the LifeSaver community and make a difference
+          </p>
+        </div>
+
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-gray-200 dark:border-gray-700"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <span
+              class="text-sm font-medium text-gray-600 dark:text-gray-400"
+              id="progressText"
+              >Step 1 of 4</span
+            >
+            <span class="text-sm text-gray-500 dark:text-gray-400"
+              >Complete all steps to register</span
+            >
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              id="progressBar"
+              style="width: 25%"
+            ></div>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <div class="flex flex-col items-center">
+              <div
+                id="stepIndicator1"
+                class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center text-sm font-semibold"
+              >
+                1
+              </div>
+              <span
+                class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center"
+                >Account Info</span
+              >
+            </div>
+            <div class="flex flex-col items-center">
+              <div
+                id="stepIndicator2"
+                class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-semibold"
+              >
+                2
+              </div>
+              <span
+                class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center"
+                >Personal Info</span
+              >
+            </div>
+            <div class="flex flex-col items-center">
+              <div
+                id="stepIndicator3"
+                class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-semibold"
+              >
+                3
+              </div>
+              <span
+                class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center"
+                >Health Questions</span
+              >
+            </div>
+            <div class="flex flex-col items-center">
+              <div
+                id="stepIndicator4"
+                class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 flex items-center justify-center text-sm font-semibold"
+              >
+                4
+              </div>
+              <span
+                class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center"
+                >Consent</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <form
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8"
+        >
+          <div id="step1" class="step active">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+              Account Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="firstName"
+                  >First Name *</label
+                >
+                <input
+                  type="text"
+                  id="firstName"
+                  required
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder="John"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="lastName"
+                  >Last Name *</label
+                >
+                <input
+                  type="text"
+                  id="lastName"
+                  required
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="email"
+                  >Email Address *</label
+                >
+                <div class="flex-column items-center space-x-2">
+                  <input
+                    type="email"
+                    id="email"
+                    required
+                    class="flex-1 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="john.doe@example.com"
+                  />
+                  <button
+                    type="button"
+                    id="sendEmailOTP"
+                    onclick="sendOTP('Email')"
+                    class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    Send OTP
+                  </button>
+                </div>
+                <div id="emailOTPDiv" class="hidden mt-2">
+                  <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    for="emailOTP"
+                    >Enter Email OTP</label
+                  >
+                  <div class="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      id="emailOTP"
+                      class="flex-1 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                      placeholder="6-digit OTP"
+                    />
+                    <button
+                      type="button"
+                      id="verifyEmailOTP"
+                      onclick="verifyOTP('Email')"
+                      class="bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Verify
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="phone"
+                  >Phone Number *</label
+                >
+                <div class="flex-column items-center space-x-2">
+                  <input
+                    type="tel"
+                    id="phone"
+                    required
+                    class="flex-1 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="9876543210"
+                  />
+                  <button
+                    type="button"
+                    id="sendPhoneOTP"
+                    onclick="sendOTP('Phone')"
+                    class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    Send OTP
+                  </button>
+                </div>
+                <div id="phoneOTPDiv" class="hidden mt-2">
+                  <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    for="phoneOTP"
+                    >Enter Phone OTP</label
+                  >
+                  <div class="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      id="phoneOTP"
+                      class="flex-1 p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                      placeholder="6-digit OTP"
+                    />
+                    <button
+                      type="button"
+                      id="verifyPhoneOTP"
+                      onclick="verifyOTP('Phone')"
+                      class="bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Verify
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="password"
+                  >Password *</label
+                >
+                <div class="relative">
+                  <input
+                    type="password"
+                    id="password"
+                    required
+                    onkeyup="checkPasswordStrength(this.value)"
+                    class="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onclick="togglePasswordVisibility('password')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                  >
+                    <i id="passwordIcon" class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <div id="passwordStrength" class="mt-2 text-sm"></div>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="confirmPassword"
+                  >Confirm Password *</label
+                >
+                <div class="relative">
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    required
+                    onkeyup="checkPasswordMatch()"
+                    class="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="Re-enter your password"
+                  />
+                  <button
+                    type="button"
+                    onclick="togglePasswordVisibility('confirmPassword')"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                  >
+                    <i id="confirmPasswordIcon" class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <div id="passwordMatch" class="mt-2 text-sm"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="step2" class="step hidden">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+              Personal Information
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="dob"
+                  >Date of Birth *</label
+                >
+                <input
+                  type="date"
+                  id="dob"
+                  required
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="gender"
+                  >Gender *</label
+                >
+                <select
+                  id="gender"
+                  required
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="bloodGroup"
+                  >Blood Group *</label
+                >
+                <select
+                  id="bloodGroup"
+                  required
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="weight"
+                  >Weight (kg) *</label
+                >
+                <input
+                  type="number"
+                  id="weight"
+                  required
+                  min="50"
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder="e.g., 65"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                for="address"
+                >Address *</label
+              >
+              <textarea
+                id="address"
+                rows="3"
+                required
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                placeholder="Street Address, City, State, Zip Code"
+              ></textarea>
+            </div>
+          </div>
+
+          <div id="step3" class="step hidden">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+              Health & Eligibility
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
+              Please answer the following questions honestly to determine your
+              eligibility for blood donation.
+            </p>
+            <div class="space-y-6">
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  for="lastDonationDate"
+                  >Date of Last Donation (if any)</label
+                >
+                <input
+                  type="date"
+                  id="lastDonationDate"
+                  class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Donations must be at least 3 months apart.
+                </p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >In the last 6 months, have you had any tattoos or piercings?
+                  *</label
+                >
+                <div class="flex items-center space-x-4">
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="tattoos"
+                      value="yes"
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >Yes</span
+                    >
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="tattoos"
+                      value="no"
+                      checked
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >No</span
+                    >
+                  </label>
+                </div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >Are you currently taking any medication or have you recently
+                  received a vaccine? *</label
+                >
+                <div class="flex items-center space-x-4">
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="medication"
+                      value="yes"
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >Yes</span
+                    >
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="medication"
+                      value="no"
+                      checked
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >No</span
+                    >
+                  </label>
+                </div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <label
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >Have you ever been diagnosed with hepatitis, HIV, or malaria?
+                  *</label
+                >
+                <div class="flex items-center space-x-4">
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="diseases"
+                      value="yes"
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >Yes</span
+                    >
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="diseases"
+                      value="no"
+                      checked
+                      required
+                      class="text-red-500 focus:ring-red-500"
+                    />
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                      >No</span
+                    >
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="step4" class="step hidden">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+              Consent & Confirmation
+            </h2>
+            <div
+              class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-6 mb-6"
+            >
+              <h3
+                class="text-lg font-semibold text-red-700 dark:text-red-300 mb-2"
+              >
+                Important Donor Information
+              </h3>
+              <p class="text-sm text-red-600 dark:text-red-400">
+                By donating blood, you are helping save lives. We will screen
+                your blood for infectious diseases to ensure safety. You will be
+                notified confidentially of any abnormal results.
+              </p>
+            </div>
+            <div class="space-y-4">
+              <div class="flex items-start">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  required
+                  class="mt-1 text-red-500 focus:ring-red-500 rounded"
+                />
+                <label
+                  for="agreeTerms"
+                  class="ml-3 text-gray-700 dark:text-gray-300 text-sm"
+                >
+                  I have read and agree to the
+                  <b class="font-bold">Terms of Service and Privacy Policy</b>.
+                </label>
+              </div>
+              <div class="flex items-start">
+                <input
+                  type="checkbox"
+                  id="confirmDetails"
+                  required
+                  class="mt-1 text-red-500 focus:ring-red-500 rounded"
+                />
+                <label
+                  for="confirmDetails"
+                  class="ml-3 text-gray-700 dark:text-gray-300 text-sm"
+                >
+                  I confirm that all the information provided in this form is
+                  true and accurate to the best of my knowledge.
+                </label>
+              </div>
+              <div class="flex items-start">
+                <input
+                  type="checkbox"
+                  id="confirmEligibility"
+                  required
+                  class="mt-1 text-red-500 focus:ring-red-500 rounded"
+                />
+                <label
+                  for="confirmEligibility"
+                  class="ml-3 text-gray-700 dark:text-gray-300 text-sm"
+                >
+                  I confirm that I meet the basic eligibility criteria for blood
+                  donation (age 18-65, weight > 50kg, no recent
+                  tattoos/piercings, etc.).
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0"
+          >
+            <button
+              type="button"
+              onclick="prevStep()"
+              class="w-full sm:w-auto px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              <i class="fas fa-arrow-left mr-2"></i> Previous
+            </button>
+            <button
+              type="button"
+              onclick="nextStep()"
+              id="nextButton"
+              class="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Next Step <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
