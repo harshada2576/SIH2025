@@ -325,7 +325,7 @@
       recognition.addEventListener("result", (event) => {
         const transcript = event.results[0][0].transcript;
         textarea.value = transcript;
-        output.innerHTML = `<p><b>Voice input:</b> ${transcript}</p>`;
+        //output.innerHTML = `<p><b>Voice input:</b> ${transcript}</p>`;
       });
 
       recognition.addEventListener("end", () => {
