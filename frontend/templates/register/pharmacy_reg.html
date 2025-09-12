@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Registration - HealthCare Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                        'float': 'float 3s ease-in-out infinite'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .registration-container {
+            max-width: 800px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+        
+        .form-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e5e7eb;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scroll-container {
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        .step-indicator.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step-indicator.completed {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .form-input:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .pharmacy-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f8fafc;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #eff6ff;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .service-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .service-checkbox:checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        .service-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="registration-container mx-auto shadow-2xl">
+        
+        <!-- Header -->
+        <div class="px-6 pt-12 pb-8 text-white">
+            <div class="flex items-center justify-between mb-8">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Pharmacy Registration</h1>
+                    <p class="text-white/80 text-sm">Join Our Healthcare Network</p>
+                </div>
+                <button onclick="showHelp()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-question-circle text-white"></i>
+                </button>
+            </div>
+            
+            <!-- Pharmacy Icon -->
+            <div class="flex justify-center mb-6">
+                <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center animate-float">
+                    <svg class="w-16 h-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Pharmacy Building -->
+                        <rect x="20" y="40" width="60" height="45" fill="#ffffff" rx="4"/>
+                        <rect x="25" y="45" width="50" height="35" fill="#667eea" rx="2"/>
+                        <!-- Cross Symbol -->
+                        <rect x="45" y="50" width="10" height="25" fill="#ffffff"/>
+                        <rect x="40" y="57" width="20" height="10" fill="#ffffff"/>
+                        <!-- Door -->
+                        <rect x="42" y="70" width="16" height="15" fill="#ffffff" rx="2"/>
+                        <!-- Windows -->
+                        <rect x="30" y="50" width="8" height="8" fill="#ffffff" rx="1"/>
+                        <rect x="62" y="50" width="8" height="8" fill="#ffffff" rx="1"/>
+                        <!-- Roof -->
+                        <path d="M15 40 L50 25 L85 40 Z" fill="#ffffff"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <h2 class="text-lg font-semibold mb-2">Register Your Pharmacy</h2>
+                <p class="text-white/80 text-sm">Connect with patients and grow your business</p>
+            </div>
+        </div>
+        <!-- Content Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="scroll-container px-6 pt-8 pb-6">
+                
+                <!-- Progress Indicator -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-4">
+                            <div id="step1" class="step-indicator active w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                            <div class="w-12 h-1 bg-gray-200 rounded"></div>
+                            <div id="step2" class="step-indicator w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm text-gray-500">2</div>
+                            <div class="w-12 h-1 bg-gray-200 rounded"></div>
+                            <div id="step3" class="step-indicator w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm text-gray-500">3</div>
+                            <div class="w-12 h-1 bg-gray-200 rounded"></div>
+                            <div id="step4" class="step-indicator w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm text-gray-500">4</div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="progress-bar h-2 rounded-full" style="width: 25%"></div>
+                    </div>
+                    <p id="stepDescription" class="text-sm text-gray-600 mt-2">Step 1 of 4: Pharmacy Information</p>
+                </div>
+                
+                <!-- Registration Form -->
+                <form id="pharmacyRegistrationForm" class="space-y-6">
+                    
+                    <!-- Step 1: Pharmacy Details -->
+                    <div id="pharmacyDetailsStep" class="form-step animate-fade-in">
+                        <div class="glass-effect rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-store pharmacy-icon mr-3 text-2xl"></i>
+                                Pharmacy/Store Details
+                            </h2>
+                            
+                            <div class="space-y-6">
+                                <!-- Pharmacy Name -->
+                                <div>
+                                    <label for="pharmacyName" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-store-alt text-blue-500 mr-2"></i>
+                                        Pharmacy Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="pharmacyName"
+                                        name="pharmacyName"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter your pharmacy name"
+                                        required
+                                    >
+                                </div>
+                                
+                                <!-- License Number -->
+                                <div>
+                                    <label for="licenseNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-certificate text-green-500 mr-2"></i>
+                                        Drug License Number *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="licenseNumber"
+                                        name="licenseNumber"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="e.g., DL-12345-ABC-2024"
+                                        required
+                                    >
+                                </div>
+                                
+                                <!-- Registration/Store ID -->
+                                <div>
+                                    <label for="storeId" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-id-card text-purple-500 mr-2"></i>
+                                        Registration/Store ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="storeId"
+                                        name="storeId"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Store registration ID (if applicable)"
+                                    >
+                                </div>
+                                
+                                <!-- Address -->
+                                <div>
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                                        Complete Address *
+                                    </label>
+                                    <textarea
+                                        id="address"
+                                        name="address"
+                                        rows="3"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                        placeholder="Enter complete address including street, area, landmarks"
+                                        required
+                                    ></textarea>
+                                </div>
+                                
+                                <!-- City, State, PIN -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-city text-indigo-500 mr-2"></i>
+                                            City *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="city"
+                                            name="city"
+                                            class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="City"
+                                            required
+                                        >
+                                    </div>
+                                    <div>
+                                        <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-flag text-orange-500 mr-2"></i>
+                                            State *
+                                        </label>
+                                        <select
+                                            id="state"
+                                            name="state"
+                                            class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            required
+                                        >
+                                            <option value="">Select State</option>
+                                            <option value="AP">Andhra Pradesh</option>
+                                            <option value="AR">Arunachal Pradesh</option>
+                                            <option value="AS">Assam</option>
+                                            <option value="BR">Bihar</option>
+                                            <option value="CT">Chhattisgarh</option>
+                                            <option value="GA">Goa</option>
+                                            <option value="GJ">Gujarat</option>
+                                            <option value="HR">Haryana</option>
+                                            <option value="HP">Himachal Pradesh</option>
+                                            <option value="JK">Jammu and Kashmir</option>
+                                            <option value="JH">Jharkhand</option>
+                                            <option value="KA">Karnataka</option>
+                                            <option value="KL">Kerala</option>
+                                            <option value="MP">Madhya Pradesh</option>
+                                            <option value="MH">Maharashtra</option>
+                                            <option value="MN">Manipur</option>
+                                            <option value="ML">Meghalaya</option>
+                                            <option value="MZ">Mizoram</option>
+                                            <option value="NL">Nagaland</option>
+                                            <option value="OR">Odisha</option>
+                                            <option value="PB">Punjab</option>
+                                            <option value="RJ">Rajasthan</option>
+                                            <option value="SK">Sikkim</option>
+                                            <option value="TN">Tamil Nadu</option>
+                                            <option value="TG">Telangana</option>
+                                            <option value="TR">Tripura</option>
+                                            <option value="UP">Uttar Pradesh</option>
+                                            <option value="UT">Uttarakhand</option>
+                                            <option value="WB">West Bengal</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="pinCode" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-mail-bulk text-teal-500 mr-2"></i>
+                                            PIN Code *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="pinCode"
+                                            name="pinCode"
+                                            class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="6-digit PIN"
+                                            pattern="[0-9]{6}"
+                                            maxlength="6"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                                
+                                <!-- Contact Information -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="contactNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-phone text-green-500 mr-2"></i>
+                                            Contact Number *
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            id="contactNumber"
+                                            name="contactNumber"
+                                            class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="+91 9876543210"
+                                            pattern="\+?[0-9]{10,15}"
+                                            required
+                                        >
+                                    </div>
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                                            Email Address *
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="pharmacy@example.com"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Pharmacist Details -->
+                    <div id="pharmacistDetailsStep" class="form-step hidden">
+                        <div class="glass-effect rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-user-md pharmacy-icon mr-3 text-2xl"></i>
+                                Pharmacist Details
+                            </h2>
+                            
+                            <div class="space-y-6">
+                                <!-- Pharmacist Name -->
+                                <div>
+                                    <label for="pharmacistName" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-user text-blue-500 mr-2"></i>
+                                        Pharmacist Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="pharmacistName"
+                                        name="pharmacistName"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter pharmacist's full name"
+                                        required
+                                    >
+                                </div>
+                                
+                                <!-- Qualification -->
+                                <div>
+                                    <label for="qualification" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-graduation-cap text-green-500 mr-2"></i>
+                                        Qualification *
+                                    </label>
+                                    <select
+                                        id="qualification"
+                                        name="qualification"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    >
+                                        <option value="">Select Qualification</option>
+                                        <option value="B.Pharm">B.Pharm (Bachelor of Pharmacy)</option>
+                                        <option value="D.Pharm">D.Pharm (Diploma in Pharmacy)</option>
+                                        <option value="M.Pharm">M.Pharm (Master of Pharmacy)</option>
+                                        <option value="Pharm.D">Pharm.D (Doctor of Pharmacy)</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Registration Number -->
+                                <div>
+                                    <label for="pharmacistRegNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-id-badge text-purple-500 mr-2"></i>
+                                        Pharmacist Registration Number *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="pharmacistRegNumber"
+                                        name="pharmacistRegNumber"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Registration number with Pharmacy Council"
+                                        required
+                                    >
+                                    <p class="text-xs text-gray-500 mt-1">Registration number issued by State Pharmacy Council</p>
+                                </div>
+                                
+                                <!-- Years of Experience -->
+                                <div>
+                                    <label for="experience" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-clock text-orange-500 mr-2"></i>
+                                        Years of Experience *
+                                    </label>
+                                    <select
+                                        id="experience"
+                                        name="experience"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    >
+                                        <option value="">Select Experience</option>
+                                        <option value="0-1">0-1 years</option>
+                                        <option value="1-3">1-3 years</option>
+                                        <option value="3-5">3-5 years</option>
+                                        <option value="5-10">5-10 years</option>
+                                        <option value="10-15">10-15 years</option>
+                                        <option value="15+">15+ years</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Additional Certifications -->
+                                <div>
+                                    <label for="certifications" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-award text-yellow-500 mr-2"></i>
+                                        Additional Certifications (Optional)
+                                    </label>
+                                    <textarea
+                                        id="certifications"
+                                        name="certifications"
+                                        rows="3"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                        placeholder="List any additional certifications, specializations, or training"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Account Setup -->
+                    <div id="accountSetupStep" class="form-step hidden">
+                        <div class="glass-effect rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-user-cog pharmacy-icon mr-3 text-2xl"></i>
+                                Login/Account Setup
+                            </h2>
+                            
+                            <div class="space-y-6">
+                                <!-- Username/Email -->
+                                <div>
+                                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-at text-blue-500 mr-2"></i>
+                                        Username/Email for Login *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="username"
+                                        name="username"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter email address for login"
+                                        required
+                                    >
+                                    <p class="text-xs text-gray-500 mt-1">This will be your login username</p>
+                                </div>
+                                
+                                <!-- Password -->
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-lock text-green-500 mr-2"></i>
+                                        Password *
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            name="password"
+                                            class="form-input w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Create a strong password"
+                                            minlength="8"
+                                            required
+                                        >
+                                        <button type="button" onclick="togglePassword('password')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i id="passwordIcon" class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div id="passwordStrength" class="text-xs text-gray-500">
+                                            Password must be at least 8 characters long
+                                        </div>
+                                        <div class="flex space-x-1 mt-1">
+                                            <div id="strength1" class="h-1 w-1/4 bg-gray-200 rounded"></div>
+                                            <div id="strength2" class="h-1 w-1/4 bg-gray-200 rounded"></div>
+                                            <div id="strength3" class="h-1 w-1/4 bg-gray-200 rounded"></div>
+                                            <div id="strength4" class="h-1 w-1/4 bg-gray-200 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Confirm Password -->
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-lock text-purple-500 mr-2"></i>
+                                        Confirm Password *
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            class="form-input w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Confirm your password"
+                                            required
+                                        >
+                                        <button type="button" onclick="togglePassword('confirmPassword')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <i id="confirmPasswordIcon" class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="passwordMatch" class="text-xs mt-1 hidden">
+                                        <span class="text-red-500">Passwords do not match</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Phone Verification -->
+                                <div>
+                                    <label for="verificationPhone" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-mobile-alt text-orange-500 mr-2"></i>
+                                        Phone Number for Verification *
+                                    </label>
+                                    <div class="flex space-x-3">
+                                        <input
+                                            type="tel"
+                                            id="verificationPhone"
+                                            name="verificationPhone"
+                                            class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="+91 9876543210"
+                                            required
+                                        >
+                                        <button type="button" onclick="sendOTP()" class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap">
+                                            Send OTP
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- OTP Verification -->
+                                <div id="otpSection" class="hidden">
+                                    <label for="otp" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-key text-red-500 mr-2"></i>
+                                        Enter OTP *
+                                    </label>
+                                    <div class="flex space-x-3">
+                                        <input
+                                            type="text"
+                                            id="otp"
+                                            name="otp"
+                                            class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Enter 6-digit OTP"
+                                            maxlength="6"
+                                            pattern="[0-9]{6}"
+                                        >
+                                        <button type="button" onclick="verifyOTP()" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap">
+                                            Verify
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">OTP sent to your phone number</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Additional Information -->
+                    <div id="additionalInfoStep" class="form-step hidden">
+                        <div class="glass-effect rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-plus-circle pharmacy-icon mr-3 text-2xl"></i>
+                                Additional Information
+                            </h2>
+                            
+                            <div class="space-y-6">
+                                <!-- License Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-upload text-blue-500 mr-2"></i>
+                                        Upload License Proof (Optional)
+                                    </label>
+                                    <div class="file-upload-area p-6 rounded-xl text-center cursor-pointer" onclick="document.getElementById('licenseFile').click()">
+                                        <input type="file" id="licenseFile" name="licenseFile" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'licensePreview')">
+                                        <div id="licensePreview">
+                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                            <p class="text-gray-600 mb-2">Click to upload license document</p>
+                                            <p class="text-xs text-gray-500">PDF, JPG, PNG (Max 5MB)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- GPS Location -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-map-pin text-red-500 mr-2"></i>
+                                        GPS Location (For Delivery Mapping)
+                                    </label>
+                                    <div class="flex space-x-3">
+                                        <input
+                                            type="text"
+                                            id="gpsLocation"
+                                            name="gpsLocation"
+                                            class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="Latitude, Longitude"
+                                            readonly
+                                        >
+                                        <button type="button" onclick="getCurrentLocation()" class="btn-secondary text-white px-6 py-3 rounded-xl font-semibold whitespace-nowrap">
+                                            <i class="fas fa-crosshairs mr-2"></i>
+                                            Get Location
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">This helps customers find you for delivery services</p>
+                                </div>
+                                
+                                <!-- Services Offered -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-4">
+                                        <i class="fas fa-concierge-bell text-purple-500 mr-2"></i>
+                                        Services Offered (Select all that apply)
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="home_delivery" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-truck text-green-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">Home Delivery</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="24_7" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-clock text-blue-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">24/7 Service</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="online_consultation" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-video text-purple-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">Online Consultation</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="prescription_pickup" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-prescription-bottle text-orange-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">Prescription Pickup</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="health_checkup" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-heartbeat text-red-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">Basic Health Checkup</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" name="services" value="insurance_accepted" class="service-checkbox">
+                                            <div class="flex items-center space-x-2">
+                                                <i class="fas fa-shield-alt text-teal-500"></i>
+                                                <span class="text-sm font-medium text-gray-700">Insurance Accepted</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Operating Hours -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-4">
+                                        <i class="fas fa-business-time text-indigo-500 mr-2"></i>
+                                        Operating Hours
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="openTime" class="block text-xs text-gray-600 mb-1">Opening Time</label>
+                                            <input
+                                                type="time"
+                                                id="openTime"
+                                                name="openTime"
+                                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                value="09:00"
+                                            >
+                                        </div>
+                                        <div>
+                                            <label for="closeTime" class="block text-xs text-gray-600 mb-1">Closing Time</label>
+                                            <input
+                                                type="time"
+                                                id="closeTime"
+                                                name="closeTime"
+                                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                value="21:00"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Additional Notes -->
+                                <div>
+                                    <label for="additionalNotes" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-sticky-note text-yellow-500 mr-2"></i>
+                                        Additional Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        id="additionalNotes"
+                                        name="additionalNotes"
+                                        rows="3"
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                        placeholder="Any additional information about your pharmacy, special services, or important notes for customers"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Terms and Conditions -->
+                        <div class="glass-effect rounded-2xl p-6 shadow-sm mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-file-contract text-blue-600 mr-3"></i>
+                                Terms and Conditions
+                            </h3>
+                            <div class="space-y-4">
+                                <label class="flex items-start space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="agreeTerms" name="agreeTerms" class="service-checkbox mt-1" required>
+                                    <div class="text-sm text-gray-700">
+                                        <span>I agree to the </span>
+                                        <a href="#" onclick="showTerms()" class="text-blue-600 hover:underline font-medium">Terms and Conditions</a>
+                                        <span> and </span>
+                                        <a href="#" onclick="showPrivacy()" class="text-blue-600 hover:underline font-medium">Privacy Policy</a>
+                                        <span> of the healthcare platform.</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-start space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="agreeData" name="agreeData" class="service-checkbox mt-1" required>
+                                    <div class="text-sm text-gray-700">
+                                        I consent to the collection and processing of my personal and business data for registration and service purposes.
+                                    </div>
+                                </label>
+                                <label class="flex items-start space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="agreeMarketing" name="agreeMarketing" class="service-checkbox mt-1">
+                                    <div class="text-sm text-gray-700">
+                                        I agree to receive marketing communications and updates about platform features (optional).
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center pt-6">
+                        <button type="button" id="prevBtn" onclick="previousStep()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors hidden">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Previous
+                        </button>
+                        <div class="flex-1"></div>
+                        <button type="button" id="nextBtn" onclick="nextStep()" class="btn-primary text-white px-8 py-3 rounded-xl font-semibold">
+                            Next
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn-secondary text-white px-8 py-3 rounded-xl font-semibold hidden">
+                            <span id="submitText">Register Pharmacy</span>
+                            <i id="submitIcon" class="fas fa-check ml-2"></i>
+                            <div id="submitSpinner" class="loading-spinner ml-2 hidden"></div>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Success Message -->
+                <div id="successMessage" class="hidden text-center py-16 animate-fade-in">
+                    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Registration Successful!</h3>
+                    <p class="text-gray-600 mb-8 px-4">Your pharmacy registration has been submitted successfully. We'll review your application and contact you within 24-48 hours.</p>
+                    <div class="space-y-4">
+                        <button onclick="goToDashboard()" class="btn-primary text-white px-8 py-3 rounded-2xl font-semibold w-full">
+                            <i class="fas fa-tachometer-alt mr-2"></i>
+                            Go to Dashboard
+                        </button>
+                        <button onclick="registerAnother()" class="border border-gray-300 text-gray-700 px-8 py-3 rounded-2xl font-semibold w-full hover:bg-gray-50">
+                            <i class="fas fa-plus mr-2"></i>
+                            Register Another Pharmacy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentStep = 1;
+        let totalSteps = 4;
+        let isOTPVerified = false;
+        
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStepIndicator();
+            setupPasswordStrengthChecker();
+            setupPasswordMatchChecker();
+            setupFormValidation();
+        });
+        
+        // Step navigation
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                    updateStepIndicator();
+                    updateProgress();
+                }
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateStepIndicator();
+                updateProgress();
+            }
+        }
+        
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.form-step').forEach(stepEl => {
+                stepEl.classList.add('hidden');
+            });
+            
+            // Show current step
+            const stepElements = {
+                1: 'pharmacyDetailsStep',
+                2: 'pharmacistDetailsStep',
+                3: 'accountSetupStep',
+                4: 'additionalInfoStep'
+            };
+            
+            document.getElementById(stepElements[step]).classList.remove('hidden');
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (step === 1) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+            
+            if (step === totalSteps) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+        }
+        
+        function updateStepIndicator() {
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < currentStep) {
+                    stepEl.className = 'step-indicator completed w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm';
+                    stepEl.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (i === currentStep) {
+                    stepEl.className = 'step-indicator active w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm';
+                    stepEl.textContent = i;
+                } else {
+                    stepEl.className = 'step-indicator w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-sm text-gray-500';
+                    stepEl.textContent = i;
+                }
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            const stepDescriptions = {
+                1: 'Step 1 of 4: Pharmacy Information',
+                2: 'Step 2 of 4: Pharmacist Details',
+                3: 'Step 3 of 4: Account Setup',
+                4: 'Step 4 of 4: Additional Information'
+            };
+            
+            document.getElementById('stepDescription').textContent = stepDescriptions[currentStep];
+        }
+        
+        // Form validation
+        function validateCurrentStep() {
+            const stepElements = {
+                1: 'pharmacyDetailsStep',
+                2: 'pharmacistDetailsStep',
+                3: 'accountSetupStep',
+                4: 'additionalInfoStep'
+            };
+            
+            const currentStepEl = document.getElementById(stepElements[currentStep]);
+            const requiredFields = currentStepEl.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    showFieldError(field, 'This field is required');
+                    isValid = false;
+                } else {
+                    clearFieldError(field);
+                }
+            });
+            
+            // Additional validation for specific steps
+            if (currentStep === 1) {
+                isValid = validatePharmacyDetails() && isValid;
+            } else if (currentStep === 3) {
+                isValid = validateAccountSetup() && isValid;
+            } else if (currentStep === 4) {
+                isValid = validateAdditionalInfo() && isValid;
+            }
+            
+            if (!isValid) {
+                showToast('Please fill in all required fields correctly', 'error');
+            }
+            
+            return isValid;
+        }
+        
+        function validatePharmacyDetails() {
+            let isValid = true;
+            
+            // Validate PIN code
+            const pinCode = document.getElementById('pinCode').value;
+            if (pinCode && !/^\d{6}$/.test(pinCode)) {
+                showFieldError(document.getElementById('pinCode'), 'PIN code must be 6 digits');
+                isValid = false;
+            }
+            
+            // Validate phone number
+            const phone = document.getElementById('contactNumber').value;
+            if (phone && !/^\+?[0-9]{10,15}$/.test(phone)) {
+                showFieldError(document.getElementById('contactNumber'), 'Please enter a valid phone number');
+                isValid = false;
+            }
+            
+            // Validate email
+            const email = document.getElementById('email').value;
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showFieldError(document.getElementById('email'), 'Please enter a valid email address');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function validateAccountSetup() {
+            let isValid = true;
+            
+            // Validate password strength
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password.length < 8) {
+                showFieldError(document.getElementById('password'), 'Password must be at least 8 characters long');
+                isValid = false;
+            }
+            
+            if (password !== confirmPassword) {
+                showFieldError(document.getElementById('confirmPassword'), 'Passwords do not match');
+                isValid = false;
+            }
+            
+            // Check if OTP is required and verified
+            if (document.getElementById('otpSection').classList.contains('hidden')) {
+                showToast('Please send and verify OTP first', 'warning');
+                isValid = false;
+            } else if (!isOTPVerified) {
+                showToast('Please verify your phone number with OTP', 'warning');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function validateAdditionalInfo() {
+            let isValid = true;
+            
+            // Check terms and conditions
+            if (!document.getElementById('agreeTerms').checked) {
+                showToast('Please agree to the Terms and Conditions', 'error');
+                isValid = false;
+            }
+            
+            if (!document.getElementById('agreeData').checked) {
+                showToast('Please consent to data processing', 'error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function showFieldError(field, message) {
+            field.classList.add('border-red-500');
+            
+            // Remove existing error message
+            const existingError = field.parentNode.querySelector('.field-error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add new error message
+            const errorEl = document.createElement('p');
+            errorEl.className = 'field-error text-xs text-red-500 mt-1';
+            errorEl.textContent = message;
+            field.parentNode.appendChild(errorEl);
+        }
+        
+        function clearFieldError(field) {
+            field.classList.remove('border-red-500');
+            const errorEl = field.parentNode.querySelector('.field-error');
+            if (errorEl) {
+                errorEl.remove();
+            }
+        }
+        
+        // Password functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + 'Icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+        
+        function setupPasswordStrengthChecker() {
+            const passwordField = document.getElementById('password');
+            passwordField.addEventListener('input', function() {
+                const password = this.value;
+                const strength = calculatePasswordStrength(password);
+                updatePasswordStrengthIndicator(strength);
+            });
+        }
+        
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            return Math.min(strength, 4);
+        }
+        
+        function updatePasswordStrengthIndicator(strength) {
+            const colors = ['bg-gray-200', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+            const messages = [
+                'Password must be at least 8 characters long',
+                'Weak password',
+                'Fair password',
+                'Good password',
+                'Strong password'
+            ];
+            
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById(`strength${i}`);
+                if (i <= strength) {
+                    indicator.className = `h-1 w-1/4 ${colors[strength]} rounded`;
+                } else {
+                    indicator.className = 'h-1 w-1/4 bg-gray-200 rounded';
+                }
+            }
+            
+            document.getElementById('passwordStrength').textContent = messages[strength];
+            document.getElementById('passwordStrength').className = `text-xs ${
+                strength <= 1 ? 'text-red-500' :
+                strength <= 2 ? 'text-yellow-500' :
+                strength <= 3 ? 'text-blue-500' : 'text-green-500'
+            }`;
+        }
+        
+        function setupPasswordMatchChecker() {
+            const confirmPasswordField = document.getElementById('confirmPassword');
+            confirmPasswordField.addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                const matchIndicator = document.getElementById('passwordMatch');
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    matchIndicator.classList.remove('hidden');
+                    this.classList.add('border-red-500');
+                } else {
+                    matchIndicator.classList.add('hidden');
+                    this.classList.remove('border-red-500');
+                }
+            });
+        }
+        
+        // OTP functionality
+        async function sendOTP() {
+            const phoneNumber = document.getElementById('verificationPhone').value;
+            
+            if (!phoneNumber) {
+                showToast('Please enter phone number first', 'warning');
+                return;
+            }
+            
+            if (!/^\+?[0-9]{10,15}$/.test(phoneNumber)) {
+                showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone: phoneNumber })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('OTP sent to your phone number', 'success');
+                    document.getElementById('otpSection').classList.remove('hidden');
+                } else {
+                    showToast(result.message || 'Failed to send OTP', 'error');
+                }
+            } catch (error) {
+                showToast('Error sending OTP: ' + error.message, 'error');
+            }
+        }
+        
+        async function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            const phoneNumber = document.getElementById('verificationPhone').value;
+            
+            if (!otp || otp.length !== 6) {
+                showToast('Please enter a 6-digit OTP', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone: phoneNumber, otp })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    isOTPVerified = true;
+                    showToast('Phone number verified successfully!', 'success');
+                    document.getElementById('otp').classList.add('border-green-500');
+                    document.getElementById('otp').readOnly = true;
+                } else {
+                    showToast(result.message || 'Invalid OTP', 'error');
+                    document.getElementById('otp').classList.add('border-red-500');
+                }
+            } catch (error) {
+                showToast('Error verifying OTP: ' + error.message, 'error');
+            }
+        }
+        
+        // File upload functionality
+        function handleFileUpload(input, previewId) {
+            const file = input.files[0];
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showToast('File size must be less than 5MB', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                const fileName = file.name;
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                preview.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file-alt text-2xl text-green-500"></i>
+                        <div class="text-left">
+                            <p class="text-sm font-medium text-gray-700">${fileName}</p>
+                            <p class="text-xs text-gray-500">${fileSize} MB</p>
+                        </div>
+                        <button type="button" onclick="removeFile('${input.id}', '${previewId}')" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function removeFile(inputId, previewId) {
+            document.getElementById(inputId).value = '';
+            document.getElementById(previewId).innerHTML = `
+                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-2">Click to upload license document</p>
+                <p class="text-xs text-gray-500">PDF, JPG, PNG (Max 5MB)</p>
+            `;
+        }
+        
+        // GPS location functionality
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                showToast('Getting your location...', 'info');
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        document.getElementById('gpsLocation').value = `${lat}, ${lng}`;
+                        showToast('Location captured successfully!', 'success');
+                    },
+                    function(error) {
+                        showToast('Unable to get location: ' + error.message, 'error');
+                    }
+                );
+            } else {
+                showToast('Geolocation is not supported by this browser', 'error');
+            }
+        }
+        
+        // Form submission
+        function setupFormValidation() {
+            document.getElementById('pharmacyRegistrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitRegistration();
+            });
+        }
+        
+        async function submitRegistration() {
+            if (!validateCurrentStep()) {
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitIcon = document.getElementById('submitIcon');
+            const submitSpinner = document.getElementById('submitSpinner');
+            
+            // Show loading state
+            submitText.textContent = 'Registering...';
+            submitIcon.classList.add('hidden');
+            submitSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            
+            try {
+                // Collect form data
+                const formData = new FormData(document.getElementById('pharmacyRegistrationForm'));
+                
+                // Add services array
+                const services = [];
+                document.querySelectorAll('input[name="services"]:checked').forEach(checkbox => {
+                    services.push(checkbox.value);
+                });
+                formData.append('services', JSON.stringify(services));
+                
+                // Add file if uploaded
+                const licenseFile = document.getElementById('licenseFile').files[0];
+                if (licenseFile) {
+                    formData.append('licenseFile', licenseFile);
+                }
+                
+                // Add boolean fields explicitly
+                formData.set('agreeTerms', document.getElementById('agreeTerms').checked.toString());
+                formData.set('agreeData', document.getElementById('agreeData').checked.toString());
+                formData.set('agreeMarketing', document.getElementById('agreeMarketing').checked.toString());
+                
+                const response = await fetch('http://localhost:8000/api/pharmacy/register', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessMessage();
+                    showToast('Pharmacy registered successfully!', 'success');
+                } else {
+                    throw new Error(result.message || 'Registration failed');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showToast('Registration failed: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                submitText.textContent = 'Register Pharmacy';
+                submitIcon.classList.remove('hidden');
+                submitSpinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+        
+        function showSuccessMessage() {
+            document.getElementById('pharmacyRegistrationForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+        }
+        
+        // Utility functions
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-xl text-white font-medium shadow-lg ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.innerHTML = `<div class="flex items-center space-x-2"><span>${message}</span></div>`;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+        
+        function showHelp() {
+            alert('Need help with registration?\n\n• Fill all required fields marked with *\n• Upload clear images of your license\n• Ensure phone number is correct for OTP\n• Contact support: support@healthcare.com');
+        }
+        
+        function showTerms() {
+            alert('Terms and Conditions:\n\n• You must be a licensed pharmacy\n• All information must be accurate\n• You agree to follow platform guidelines\n• Service fees may apply\n• Account can be suspended for violations');
+        }
+        
+        function showPrivacy() {
+            alert('Privacy Policy:\n\n• We protect your personal information\n• Data is used only for registration and services\n• We do not share data with third parties\n• You can request data deletion anytime\n• Secure encryption is used for all data');
+        }
+        
+        function goBack() {
+            if (confirm('Are you sure you want to go back? Your progress will be lost.')) {
+                window.history.back();
+            }
+        }
+        
+        function goToDashboard() {
+            window.location.href = '/pharmacy-dashboard';
+        }
+        
+        function registerAnother() {
+            if (confirm('Register another pharmacy? This will clear the current form.')) {
+                location.reload();
+            }
+        }
+        
+        // Drag and drop functionality for file upload
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUploadArea = document.querySelector('.file-upload-area');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight(e) {
+                fileUploadArea.classList.add('dragover');
+            }
+            
+            function unhighlight(e) {
+                fileUploadArea.classList.remove('dragover');
+            }
+            
+            fileUploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    document.getElementById('licenseFile').files = files;
+                    handleFileUpload(document.getElementById('licenseFile'), 'licensePreview');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
