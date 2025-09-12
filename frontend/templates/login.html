@@ -83,7 +83,7 @@
                             <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                             <span class="ml-2 text-sm text-gray-600">Remember me</span>
                         </label>
-                        <a href="#" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
+                        <a href="forgotpassword.html" class="text-sm text-blue-600 hover:text-blue-800">Forgot password?</a>
                     </div>
 
                     <button type="submit" 
@@ -186,9 +186,9 @@
                 // Redirect after delay
                 setTimeout(() => {
     if (selectedRole === "patient") {
-        window.location.href = "hello.html"; // ✅ go to Hello World page
+        window.location.href = "home.html"; // ✅ go to Hello World page
     } else {
-        window.location.href = "doctor-portal.html";
+        window.location.href = "doctorhome.html";
     }
 }, 1500);
 
@@ -198,7 +198,7 @@
         }
 
         function goToRegister() {
-            window.location.href = 'register.html';
+            window.location.href = 'register/main_registration.html';
         }
 
         function showNotification(message, type) {

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Management - Healthcare Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+       
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+       
+        .dashboard-container {
+            max-width: 414px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+       
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+       
+        .btn-approve {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+       
+        .btn-reject {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+       
+        .btn-call {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+       
+        .btn-video {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-video:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.4);
+        }
+       
+        .appointment-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+       
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .appointment-card.approved {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        }
+       
+        .appointment-card.pending {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+       
+        .appointment-card.rejected {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+       
+        .consultation-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+       
+        .consultation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .scroll-container {
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+       
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+       
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+       
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+       
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+       
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+       
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+       
+        .status-approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+       
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+       
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="dashboard-container mx-auto shadow-2xl">
+       
+        <!-- Header -->
+        <div class="px-6 pt-12 pb-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Appointment Manager</h1>
+                    <p class="text-white/80 text-sm">Manage your consultations</p>
+                </div>
+                <button onclick="refreshData()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i id="refreshIcon" class="fas fa-sync-alt text-white"></i>
+                </button>
+            </div>
+           
+            <!-- Tab Navigation -->
+            <div class="flex bg-white/20 rounded-2xl p-1">
+                <button id="appointmentsTab" onclick="switchTab('appointments')" class="tab-button active flex-1 py-3 px-4 rounded-xl font-semibold text-sm">
+                    Approve Appointments
+                </button>
+                <button id="consultancyTab" onclick="switchTab('consultancy')" class="tab-button flex-1 py-3 px-4 rounded-xl font-semibold text-sm text-white/80">
+                    Online Queue
+                </button>
+            </div>
+        </div>
+        <!-- Content Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="scroll-container px-6 pt-8 pb-6">
+               
+                <!-- Loading State -->
+                <div id="loadingState" class="animate-fade-in">
+                    <div class="space-y-4">
+                        <div class="appointment-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="loading-skeleton w-12 h-12 rounded-full"></div>
+                                <div class="flex-1">
+                                    <div class="loading-skeleton h-4 w-32 mb-2 rounded"></div>
+                                    <div class="loading-skeleton h-3 w-24 rounded"></div>
+                                </div>
+                                <div class="loading-skeleton w-16 h-8 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="appointment-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="loading-skeleton w-12 h-12 rounded-full"></div>
+                                <div class="flex-1">
+                                    <div class="loading-skeleton h-4 w-28 mb-2 rounded"></div>
+                                    <div class="loading-skeleton h-3 w-20 rounded"></div>
+                                </div>
+                                <div class="loading-skeleton w-16 h-8 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+                <!-- Approve Appointments Section -->
+                <div id="appointmentsSection" class="hidden animate-fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">Pending Approvals</h2>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-clock"></i>
+                            <span id="appointmentsCount">0 appointments</span>
+                        </div>
+                    </div>
+                   
+                    <div id="appointmentsList" class="space-y-4">
+                        <!-- Appointments will be populated here -->
+                    </div>
+                   
+                    <!-- Empty State for Appointments -->
+                    <div id="appointmentsEmpty" class="hidden text-center py-16">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-calendar-check text-blue-600 text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">All Caught Up!</h3>
+                        <p class="text-gray-600">No pending appointments to approve at the moment.</p>
+                    </div>
+                </div>
+               
+                <!-- Online Consultancy Queue Section -->
+                <div id="consultancySection" class="hidden animate-fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">Consultation Queue</h2>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-users"></i>
+                            <span id="queueCount">0 in queue</span>
+                        </div>
+                    </div>
+                   
+                    <div id="consultancyList" class="space-y-4">
+                        <!-- Consultancy queue will be populated here -->
+                    </div>
+                   
+                    <!-- Empty State for Consultancy -->
+                    <div id="consultancyEmpty" class="hidden text-center py-16">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-video text-green-600 text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">No Active Queue</h3>
+                        <p class="text-gray-600">No patients waiting for online consultation.</p>
+                    </div>
+                </div>
+               
+                <!-- Error State -->
+                <div id="errorState" class="hidden text-center py-16 animate-fade-in">
+                    <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Unable to Load Data</h3>
+                    <p class="text-gray-600 mb-8">Using dummy data as fallback. Please try again later.</p>
+                    <button onclick="loadDashboardData()" class="btn-primary text-white px-8 py-3 rounded-2xl font-semibold">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentTab = 'appointments';
+        let appointmentsData = [];
+        let consultancyData = [];
+        let refreshInterval;
+       
+        // Dummy data fallback
+        const dummyAppointments = [
+            { id: '1', name: 'Alice Johnson', day: '12 Sep 2025', time: '10:00 AM', status: 'pending', notes: 'Follow-up appointment' },
+            { id: '2', name: 'Bob Smith', day: '13 Sep 2025', time: '02:00 PM', status: 'pending', notes: 'Initial consultation' }
+        ];
+       
+        const dummyConsultancy = [
+            { id: '1', name: 'Charlie Brown', waitTime: '5 min', position: 1, symptoms: 'Fever and cough', urgency: 'medium', phoneIcon: true, videoIcon: true },
+            { id: '2', name: 'Diana Lee', waitTime: '10 min', position: 2, symptoms: 'Headache', urgency: 'low', phoneIcon: true, videoIcon: true }
+        ];
+       
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            startAutoRefresh();
+        });
+       
+        // Auto-refresh every 30 seconds
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadDashboardData(true); // Silent refresh
+            }, 30000);
+        }
+       
+        // Load dashboard data from API
+        async function loadDashboardData(silent = false) {
+            try {
+                if (!silent) {
+                    showLoadingState();
+                }
+               
+                // Fetch appointments data
+                const appointmentsResponse = await fetch('http://localhost:8000/api/appointments/pending', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                // Fetch consultancy queue data
+                const consultancyResponse = await fetch('http://localhost:8000/api/consultancy/queue', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                let appointmentsResult, consultancyResult;
+                if (appointmentsResponse.ok && consultancyResponse.ok) {
+                    appointmentsResult = await appointmentsResponse.json();
+                    consultancyResult = await consultancyResponse.json();
+                } else {
+                    throw new Error('Failed to fetch data from backend');
+                }
+               
+                if (appointmentsResult.success && consultancyResult.success) {
+                    appointmentsData = appointmentsResult.data?.appointments || [];
+                    consultancyData = consultancyResult.data?.consultancyQueue || [];
+                } else {
+                    throw new Error('Invalid response from backend');
+                }
+               
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Fallback to dummy data on failure
+                appointmentsData = dummyAppointments;
+                consultancyData = dummyConsultancy;
+                if (!silent) {
+                    document.getElementById('errorState').querySelector('p').textContent = `Using dummy data as fallback. Last updated: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}. Please try again later.`;
+                }
+            } finally {
+                populateAppointments();
+                populateConsultancyQueue();
+                if (!silent) {
+                    showCurrentTab();
+                }
+            }
+        }
+       
+        // Populate appointments section
+        function populateAppointments() {
+            const appointmentsList = document.getElementById('appointmentsList');
+            const appointmentsCount = document.getElementById('appointmentsCount');
+            const appointmentsEmpty = document.getElementById('appointmentsEmpty');
+           
+            appointmentsCount.textContent = `${appointmentsData.length} appointment${appointmentsData.length !== 1 ? 's' : ''}`;
+           
+            if (appointmentsData.length === 0) {
+                appointmentsList.innerHTML = '';
+                appointmentsEmpty.classList.remove('hidden');
+                return;
+            }
+           
+            appointmentsEmpty.classList.add('hidden');
+           
+            appointmentsList.innerHTML = appointmentsData.map(appointment => {
+                const statusClass = getStatusClass(appointment.status);
+                const statusIcon = getStatusIcon(appointment.status);
+                const statusText = getStatusText(appointment.status);
+               
+                return `
+                    <div class="appointment-card ${statusClass} bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-800 mb-1">${appointment.name}</h3>
+                                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>${appointment.day}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-clock"></i>
+                                        <span>${appointment.time}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end space-y-2">
+                                <div class="status-badge status-${appointment.status}">
+                                    ${statusIcon} ${statusText}
+                                </div>
+                                ${appointment.status === 'pending' ? `
+                                    <div class="flex space-x-2">
+                                        <button onclick="approveAppointment('${appointment.id}')" class="btn-approve text-white px-3 py-1 rounded-lg text-xs font-medium">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button onclick="rejectAppointment('${appointment.id}')" class="btn-reject text-white px-3 py-1 rounded-lg text-xs font-medium">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ${appointment.notes ? `
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-sticky-note text-gray-400 mr-2"></i>
+                                    ${appointment.notes}
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+       
+        // Populate consultancy queue section
+        function populateConsultancyQueue() {
+            const consultancyList = document.getElementById('consultancyList');
+            const queueCount = document.getElementById('queueCount');
+            const consultancyEmpty = document.getElementById('consultancyEmpty');
+           
+            queueCount.textContent = `${consultancyData.length} in queue`;
+           
+            if (consultancyData.length === 0) {
+                consultancyList.innerHTML = '';
+                consultancyEmpty.classList.remove('hidden');
+                return;
+            }
+           
+            consultancyEmpty.classList.add('hidden');
+           
+            consultancyList.innerHTML = consultancyData.map((patient, index) => {
+                return `
+                    <div class="consultation-card bg-white rounded-2xl p-4 shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-800 mb-1">${patient.name}</h3>
+                                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Waiting ${patient.waitTime || '5 min'}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-list-ol"></i>
+                                        <span>Position ${index + 1}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                ${patient.phoneIcon !== false ? `
+                                    <button onclick="startPhoneCall('${patient.id}', '${patient.name}')" class="btn-call text-white p-3 rounded-xl font-medium">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                ` : ''}
+                                ${patient.videoIcon !== false ? `
+                                    <button onclick="startVideoCall('${patient.id}', '${patient.name}')" class="btn-video text-gray-700 p-3 rounded-xl font-medium">
+                                        <i class="fas fa-video"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ${patient.symptoms ? `
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-notes-medical text-gray-400 mr-2"></i>
+                                    <strong>Symptoms:</strong> ${patient.symptoms}
+                                </p>
+                            </div>
+                        ` : ''}
+                        ${patient.urgency ? `
+                            <div class="mt-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${patient.urgency === 'high' ? 'bg-red-100 text-red-800' : patient.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    ${patient.urgency.charAt(0).toUpperCase() + patient.urgency.slice(1)} Priority
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+       
+        // Helper functions for appointment status
+        function getStatusClass(status) {
+            switch (status) {
+                case 'approved': return 'approved';
+                case 'rejected': return 'rejected';
+                default: return 'pending';
+            }
+        }
+       
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'approved': return '✅';
+                case 'rejected': return '❌';
+                default: return '⏳';
+            }
+        }
+       
+        function getStatusText(status) {
+            switch (status) {
+                case 'approved': return 'Approved';
+                case 'rejected': return 'Rejected';
+                default: return 'Pending';
+            }
+        }
+       
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+           
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-white/80');
+            });
+           
+            if (tab === 'appointments') {
+                document.getElementById('appointmentsTab').classList.add('active');
+                document.getElementById('appointmentsTab').classList.remove('text-white/80');
+            } else {
+                document.getElementById('consultancyTab').classList.add('active');
+                document.getElementById('consultancyTab').classList.remove('text-white/80');
+            }
+           
+            showCurrentTab();
+        }
+       
+        function showCurrentTab() {
+            // Hide all sections
+            document.getElementById('appointmentsSection').classList.add('hidden');
+            document.getElementById('consultancySection').classList.add('hidden');
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+           
+            // Show current tab
+            if (currentTab === 'appointments') {
+                document.getElementById('appointmentsSection').classList.remove('hidden');
+            } else {
+                document.getElementById('consultancySection').classList.remove('hidden');
+            }
+        }
+       
+        // State management functions
+        function showLoadingState() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('appointmentsSection').classList.add('hidden');
+            document.getElementById('consultancySection').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+        }
+       
+        function showErrorState() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('appointmentsSection').classList.add('hidden');
+            document.getElementById('consultancySection').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+       
+        // Appointment actions
+        async function approveAppointment(appointmentId) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/appointments/${appointmentId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    // Update local data
+                    const appointment = appointmentsData.find(apt => apt.id === appointmentId);
+                    if (appointment) {
+                        appointment.status = 'approved';
+                        populateAppointments();
+                    }
+                   
+                    // Show success message
+                    showToast('Appointment approved successfully!', 'success');
+                } else {
+                    throw new Error('Failed to approve appointment');
+                }
+               
+            } catch (error) {
+                console.error('Error approving appointment:', error);
+                showToast('Failed to approve appointment. Please try again.', 'error');
+            }
+        }
+       
+        async function rejectAppointment(appointmentId) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/appointments/${appointmentId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    // Update local data
+                    const appointment = appointmentsData.find(apt => apt.id === appointmentId);
+                    if (appointment) {
+                        appointment.status = 'rejected';
+                        populateAppointments();
+                    }
+                   
+                    // Show success message
+                    showToast('Appointment rejected.', 'info');
+                } else {
+                    throw new Error('Failed to reject appointment');
+                }
+               
+            } catch (error) {
+                console.error('Error rejecting appointment:', error);
+                showToast('Failed to reject appointment. Please try again.', 'error');
+            }
+        }
+       
+        // Consultation actions
+        async function startPhoneCall(patientId, patientName) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/consultancy/${patientId}/call`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const result = await response.json();
+                   
+                    // Open phone call interface or redirect
+                    if (result.data?.phoneNumber) {
+                        window.location.href = `tel:${result.data.phoneNumber}`;
+                    } else {
+                        // Navigate to call interface
+                        window.location.href = `/call?patientId=${patientId}&type=phone`;
+                    }
+                   
+                    showToast(`Starting phone call with ${patientName}`, 'success');
+                } else {
+                    throw new Error('Failed to initiate phone call');
+                }
+               
+            } catch (error) {
+                console.error('Error starting phone call:', error);
+                showToast('Failed to start phone call. Please try again.', 'error');
+            }
+        }
+       
+        async function startVideoCall(patientId, patientName) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/consultancy/${patientId}/video`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    const result = await response.json();
+                   
+                    // Navigate to video call interface
+                    if (result.data?.meetingUrl) {
+                        window.open(result.data.meetingUrl, '_blank');
+                    } else {
+                        window.location.href = `/video-call?patientId=${patientId}&type=video`;
+                    }
+                   
+                    showToast(`Starting video call with ${patientName}`, 'success');
+                } else {
+                    throw new Error('Failed to initiate video call');
+                }
+               
+            } catch (error) {
+                console.error('Error starting video call:', error);
+                showToast('Failed to start video call. Please try again.', 'error');
+            }
+        }
+       
+        // Utility functions
+        function refreshData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('animate-spin');
+           
+            loadDashboardData().finally(() => {
+                setTimeout(() => {
+                    refreshIcon.classList.remove('animate-spin');
+                }, 1000);
+            });
+        }
+       
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg text-white font-medium ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.textContent = message;
+           
+            document.body.appendChild(toast);
+           
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+       
+        function goBack() {
+            // Navigate back to previous page
+            window.history.back();
+        }
+       
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dfb293d09b2965',t:'MTc1NzY4MzE3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

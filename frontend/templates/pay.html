@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - Healthcare Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-md mx-auto min-h-screen bg-white shadow-lg rounded-xl p-6">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <button onclick="goBack()" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+        <i class="fas fa-arrow-left text-gray-600"></i>
+      </button>
+      <h1 class="text-xl font-bold text-gray-800">Payment</h1>
+      <div class="w-8 h-8"></div>
+    </div>
+
+    <!-- Appointment Details -->
+    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+      <h2 class="font-semibold text-gray-700 mb-2">Appointment Summary</h2>
+      <p id="doctorInfo" class="text-gray-600"></p>
+      <p id="slotInfo" class="text-gray-600"></p>
+      <p id="feeInfo" class="text-gray-600 font-bold mt-2"></p>
+    </div>
+
+    <!-- Razorpay Button -->
+    <button id="payBtn" class="w-full btn-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2">
+      <i class="fas fa-lock"></i>
+      <span>Pay with Razorpay</span>
+    </button>
+  </div>
+
+  <script>
+    // Parse query params
+    const params = new URLSearchParams(window.location.search);
+    const doctorId = params.get("doctorId") || "N/A";
+    const slot = decodeURIComponent(params.get("slot") || "N/A");
+    const fee = params.get("fee") || "0";
+
+    // Populate summary
+    document.getElementById("doctorInfo").textContent = `Doctor ID: ${doctorId}`;
+    document.getElementById("slotInfo").textContent = `Selected Slot: ${slot}`;
+    document.getElementById("feeInfo").textContent = `Consultation Fee: ₹${fee}`;
+
+    // Razorpay integration
+    document.getElementById("payBtn").addEventListener("click", function() {
+      const options = {
+        key: "rzp_test_yourKeyHere", // 🔑 Replace with your Razorpay Key ID
+        amount: fee * 100, // Razorpay works in paise (₹1 = 100 paise)
+        currency: "INR",
+        name: "Healthcare Platform",
+        description: `Appointment with Doctor ${doctorId}`,
+        image: "https://razorpay.com/favicon.png",
+        handler: function (response) {
+          console.log("Payment successful:", response);
+          alert("Payment Successful! Redirecting...");
+          window.location.href = `bookoffline.html?success=true&doctorId=${doctorId}&slot=${encodeURIComponent(slot)}`;
+        },
+        prefill: {
+          name: "Patient Name",
+          email: "patient@example.com",
+          contact: "9999999999"
+        },
+        notes: {
+          doctor_id: doctorId,
+          appointment_slot: slot
+        },
+        theme: {
+          color: "#667eea"
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+</html>
