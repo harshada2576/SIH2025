@@ -1,3 +1,5 @@
+# app/api/endpoint/translate
+
 from fastapi import APIRouter, Query
 from deep_translator import GoogleTranslator
 

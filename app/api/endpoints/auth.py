@@ -20,7 +20,10 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
+    # Check username or email
     db_user = crud_user.get_user_by_username(db, user.username)
+    if not db_user:
+        db_user = db.query(User).filter(User.email == user.username).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
@@ -29,4 +32,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         expires_delta=timedelta(minutes=60)
     )
     return {"access_token": access_token, "token_type": "bearer"}
+    
 
+@router.post("/forgot-password")
+def forgot_password(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Email not found")
+    # Placeholder: Simulate sending reset link
+    return {"message": "Reset link sent to your email (simulated for demo)"}

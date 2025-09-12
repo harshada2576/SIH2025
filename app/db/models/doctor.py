@@ -1,3 +1,5 @@
+# app/db/models/doctor
+
 from sqlalchemy import Column, Integer, String, Boolean, Date, LargeBinary, JSON
 from app.db.database import Base
 
@@ -21,6 +23,9 @@ class Doctor(Base):
     sub_specialization = Column(String)
     experience = Column(Integer)
     qualifications = Column(String)
+
+    # app/db/models/doctor.py
+    certificate_path = Column(String, nullable=True)
     
     # Practice info
     hospital_name = Column(String)

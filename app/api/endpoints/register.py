@@ -1,12 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+# app/api/endpoints/register.py
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Optional
 from app.db.database import get_db
 from app.schemas.doctor import RegisterDoctorRequest
 from app.db.models.doctor import Doctor
 from app.core.security import get_password_hash
-#import shutil
-#import os
+import os
 from datetime import datetime, date
 
 router = APIRouter()
@@ -14,24 +13,28 @@ router = APIRouter()
 @router.post("/register")
 async def register_doctor(
     doctor_data: RegisterDoctorRequest,
+    certificate: UploadFile = File(None),  # Optional file upload
     db: Session = Depends(get_db)
 ):
-    # Basic validations
     if db.query(Doctor).filter(Doctor.email == doctor_data.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(Doctor).filter(Doctor.phone == doctor_data.phone).first():
         raise HTTPException(status_code=400, detail="Phone already registered")
     
-    dob = doctor_data.date_of_birth  # This is a string like "1980-01-01"
+    dob = doctor_data.date_of_birth
     if isinstance(dob, str):
         dob_date = datetime.strptime(dob, "%Y-%m-%d").date()
-    elif isinstance(dob, date):
-        dob_date = dob
     else:
-        # Optional: handle invalid type
-        raise ValueError("Invalid date_of_birth format")
+        dob_date = dob
 
     hashed_password = get_password_hash(doctor_data.password)
+
+    # Save certificate if provided
+    certificate_path = None
+    if certificate:
+        certificate_path = f"uploads/{certificate.filename}"
+        with open(certificate_path, "wb") as f:
+            f.write(await certificate.read())
 
     doctor = Doctor(
         first_name=doctor_data.first_name,
@@ -68,7 +71,9 @@ async def register_doctor(
         languages=doctor_data.languages,
         emergency_contact=doctor_data.emergency_contact,
         bio=doctor_data.bio,
-        
+
+        certificate_path=certificate_path,  # Add to Doctor model if needed
+
         confirm_details=doctor_data.confirm_details,
         agree_terms=doctor_data.agree_terms,
     )

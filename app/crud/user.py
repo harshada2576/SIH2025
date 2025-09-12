@@ -1,3 +1,5 @@
+# app/crud/user
+
 from sqlalchemy.orm import Session
 from app.db.models.user import User
 from app.core.security import get_password_hash, verify_password
