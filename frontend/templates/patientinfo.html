@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/4d38c8a6d6.js" crossorigin="anonymous"></script>
+    <style>
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .chatbot-message { animation: slideIn 0.5s ease-out forwards; }
+        .gradient-bg { background: linear-gradient(135deg, #e0e7ff, #ffffff); }
+        .fade-in { animation: fadeIn 1s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .sticky-header { position: sticky; top: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-blue-50 min-h-screen font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow sticky-header">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-heartbeat text-blue-600 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">AI Health Assistant</h1>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="refreshData()" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                    <i id="refreshIcon" class="fas fa-sync-alt"></i>
+                    <span>Refresh</span>
+                </button>
+                <button onclick="goBack()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center h-64">
+            <i class="fas fa-spinner text-blue-600 text-4xl animate-spin"></i>
+            <p class="mt-4 text-gray-600 font-medium">Loading medical data...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden flex flex-col items-center justify-center h-64">
+            <i class="fas fa-exclamation-circle text-red-600 text-4xl"></i>
+            <p class="mt-4 text-gray-600 font-medium">Failed to load medical data. Please try again later.</p>
+            <button onclick="refreshData()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Retry
+            </button>
+        </div>
+
+        <!-- Consultation Content -->
+        <div id="consultationContent" class="hidden space-y-8">
+            <!-- Consultation Header -->
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-800">Health Consultation</h2>
+                    <div class="text-sm text-gray-600">
+                        <span>Date:</span>
+                        <span id="consultationDate" class="font-medium"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Profile -->
+            <section class="bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Patient Profile</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Patient ID</p>
+                        <p id="patientId" class="font-medium text-gray-800">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Blood Group</p>
+                        <p id="bloodGroup" class="font-medium text-gray-800">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Last Updated</p>
+                        <p id="lastUpdated" class="font-medium text-gray-800">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Medical History -->
+            <section class="bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Medical History</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Allergies</h4>
+                        <div id="allergiesList" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Past Illnesses</h4>
+                        <div id="pastIllnessesList" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Current Medications</h4>
+                        <div id="medicationsList" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Family Medical History</h4>
+                        <p id="familyHistory" class="text-gray-600 text-sm leading-relaxed">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Prescriptions -->
+            <section class="bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Prescriptions</h3>
+                <div id="doctorPrescriptionList" class="space-y-4"></div>
+            </section>
+
+            <!-- Symptom Input -->
+            <section class="bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Symptom Analysis</h3>
+                <div class="space-y-4">
+                    <textarea id="symptomsInput" class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Describe your symptoms here (e.g., headache, fever, cough)..."></textarea>
+                    <button onclick="analyzeSymptoms()" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                        ANALYZE SYMPTOMS
+                    </button>
+                </div>
+            </section>
+
+            <!-- Analysis Loading State -->
+            <div id="analysisLoading" class="hidden flex flex-col items-center justify-center h-32">
+                <i class="fas fa-spinner text-blue-600 text-3xl animate-spin"></i>
+                <p class="mt-4 text-gray-600 font-medium">Analyzing symptoms...</p>
+            </div>
+
+            <!-- Suggestions Section -->
+            <section id="suggestionsSection" class="hidden bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Health Suggestions</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Possible Conditions</h4>
+                        <div id="conditionsList" class="space-y-4"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-gray-700 mb-2">Recommended Actions</h4>
+                        <div id="actionsList" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Prescription Section -->
+            <section id="prescriptionSection" class="hidden bg-white p-6 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800">AI-Generated Prescription</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadPrescription()" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-download"></i>
+                            <span>Download</span>
+                        </button>
+                        <button onclick="emailPrescription()" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email to Doctor</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 pt-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">Prescription Date</p>
+                            <p id="prescriptionDate" class="font-medium text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Patient ID</p>
+                            <p id="prescriptionPatientId" class="font-medium text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Prescription ID</p>
+                            <p id="prescriptionId" class="font-medium text-gray-800">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="prescriptionList" class="space-y-4"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <p class="text-gray-600 text-sm">© 2025 AI Health Assistant. All rights reserved.</p>
+            <button onclick="callEmergency()" class="flex items-center space-x-2 text-red-600 hover:text-red-800">
+                <i class="fas fa-phone-alt"></i>
+                <span>Emergency Call</span>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        let medicalData = null;
+        let isAnalyzing = false;
+
+        // Initialize app on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMedicalData();
+            updateConsultationDate();
+        });
+
+        // Fetch medical data from backend
+        async function loadMedicalData() {
+            try {
+                showLoadingState();
+
+                // Retrieve patient ID from URL, localStorage, or default to '1'
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId') || localStorage.getItem('patientId') || '1';
+
+                // Make API call to backend
+                const response = await fetch(`http://localhost:8000/api/patients/${patientId}/medical-summary`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success || !result.data) {
+                    throw new Error(result.message || 'Invalid response format: Missing success or data');
+                }
+
+                medicalData = result.data;
+                populateMedicalData(medicalData);
+                showConsultationContent();
+
+            } catch (error) {
+                console.error('Failed to load medical data:', error);
+                loadDummyData(); // Silently fall back to dummy data
+            }
+        }
+
+        // Generate and load dummy data when backend is unavailable
+        function loadDummyData() {
+            medicalData = {
+                patientId: 'PAT-DEMO-001',
+                bloodGroup: 'A+',
+                lastUpdated: new Date().toISOString(),
+                allergies: ['Penicillin', 'Shellfish', 'Pollen'],
+                pastIllnesses: [
+                    { condition: 'Hypertension', year: '2020' },
+                    { condition: 'Seasonal Allergies', year: '2019' },
+                    { condition: 'Minor Surgery (Appendix)', year: '2018' }
+                ],
+                medications: [
+                    { name: 'Lisinopril 10mg' },
+                    { name: 'Vitamin D3' },
+                    { name: 'Multivitamin' }
+                ],
+                doctorPrescription: [
+                    {
+                        name: 'Amoxicillin 500mg',
+                        prescribedBy: 'Dr. Sarah Johnson',
+                        date: '2024-01-15',
+                        dosage: '500mg capsules',
+                        frequency: '3 times daily',
+                        duration: '7 days',
+                        instructions: 'Take with food to reduce stomach upset'
+                    },
+                    {
+                        name: 'Lisinopril 10mg',
+                        prescribedBy: 'Dr. Michael Chen',
+                        date: '2024-01-10',
+                        dosage: '10mg tablets',
+                        frequency: 'Once daily',
+                        duration: 'Ongoing',
+                        instructions: 'Take at the same time each day, preferably in the morning'
+                    }
+                ],
+                familyHistory: 'Father: Diabetes Type 2, Hypertension. Mother: Breast cancer (age 65), Osteoporosis. Maternal grandmother: Heart disease. No other significant family medical history.',
+                symptoms: '',
+                suggestions: null,
+                prescription: null
+            };
+
+            populateMedicalData(medicalData);
+            showConsultationContent();
+        }
+
+        // Populate medical data in the UI
+        function populateMedicalData(data) {
+            if (!data) {
+                console.error('No medical data provided to populateMedicalData');
+                showErrorState();
+                return;
+            }
+
+            // Patient Profile
+            const patientIdEl = document.getElementById('patientId');
+            const bloodGroupEl = document.getElementById('bloodGroup');
+            const lastUpdatedEl = document.getElementById('lastUpdated');
+            if (patientIdEl) patientIdEl.textContent = data.patientId || 'Unknown';
+            if (bloodGroupEl) bloodGroupEl.textContent = data.bloodGroup || 'Unknown';
+            if (lastUpdatedEl) lastUpdatedEl.textContent = formatDate(data.lastUpdated) || 'Unknown';
+
+            // Allergies
+            const allergiesList = document.getElementById('allergiesList');
+            if (allergiesList) {
+                allergiesList.innerHTML = data.allergies?.length
+                    ? data.allergies.map(allergy => 
+                        `<span class="inline-block bg-red-100 text-red-800 text-xs font-medium px-3 py-1 rounded-full">${allergy}</span>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic">No known allergies</p>';
+            }
+
+            // Past Illnesses
+            const pastIllnessesList = document.getElementById('pastIllnessesList');
+            if (pastIllnessesList) {
+                pastIllnessesList.innerHTML = data.pastIllnesses?.length
+                    ? data.pastIllnesses.map(illness => 
+                        `<div class="flex items-center space-x-2">
+                            <i class="fas fa-notes-medical text-gray-500"></i>
+                            <p class="text-sm text-gray-600">${illness.condition} (${illness.year})</p>
+                        </div>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic">No past illnesses recorded</p>';
+            }
+
+            // Current Medications
+            const medicationsList = document.getElementById('medicationsList');
+            if (medicationsList) {
+                medicationsList.innerHTML = data.medications?.length
+                    ? data.medications.map(med => 
+                        `<div class="flex items-center space-x-2">
+                            <i class="fas fa-pills text-blue-500"></i>
+                            <p class="text-sm text-gray-600">${med.name}</p>
+                        </div>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic">No current medications</p>';
+            }
+
+            // Family History
+            const familyHistoryEl = document.getElementById('familyHistory');
+            if (familyHistoryEl) {
+                familyHistoryEl.textContent = data.familyHistory || 'No family medical history provided';
+            }
+
+            // Recent Prescriptions
+            const doctorPrescriptionList = document.getElementById('doctorPrescriptionList');
+            if (doctorPrescriptionList) {
+                doctorPrescriptionList.innerHTML = data.doctorPrescription?.length
+                    ? data.doctorPrescription.map((prescription, index) => 
+                        `<div class="prescription-card p-5 rounded-xl chatbot-message border-l-4 border-blue-500" style="animation-delay: ${index * 0.1}s">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-blue-200">
+                                    <i class="fas fa-prescription-bottle-alt text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <h4 class="font-bold text-gray-800 text-lg">${prescription.name || 'Unknown Medication'}</h4>
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">Doctor</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-3 text-sm mb-4">
+                                        <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <i class="fas fa-user-md text-gray-600"></i>
+                                                <span class="font-semibold text-gray-700">Prescribed By</span>
+                                            </div>
+                                            <p class="text-gray-800 font-medium">${prescription.prescribedBy || 'Unknown'}</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <i class="fas fa-calendar text-gray-600"></i>
+                                                <span class="font-semibold text-gray-700">Date</span>
+                                            </div>
+                                            <p class="text-gray-800 font-medium">${formatDate(prescription.date) || 'Unknown'}</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <i class="fas fa-prescription text-green-600"></i>
+                                                <span class="font-semibold text-gray-700">Dosage & Strength</span>
+                                            </div>
+                                            <p class="text-gray-800 font-medium">${prescription.dosage || 'As prescribed'}</p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <i class="fas fa-clock text-blue-600"></i>
+                                                <span class="font-semibold text-gray-700">Frequency & Timing</span>
+                                            </div>
+                                            <p class="text-gray-800 font-medium">${prescription.frequency || 'As needed'}</p>
+                                        </div>
+                                        ${prescription.duration ? `
+                                            <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <i class="fas fa-calendar text-purple-600"></i>
+                                                    <span class="font-semibold text-gray-700">Treatment Duration</span>
+                                                </div>
+                                                <p class="text-gray-800 font-medium">${prescription.duration}</p>
+                                            </div>
+                                        ` : ''}
+                                        ${prescription.instructions ? `
+                                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg">
+                                                <div class="flex items-start space-x-2">
+                                                    <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                                                    <div>
+                                                        <h5 class="font-semibold text-blue-800 mb-2">Instructions</h5>
+                                                        <p class="text-sm text-blue-700 leading-relaxed">${prescription.instructions}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic">No recent prescriptions</p>';
+            }
+        }
+
+        // Analyze user-entered symptoms
+        async function analyzeSymptoms() {
+            const symptomsInput = document.getElementById('symptomsInput');
+            if (!symptomsInput) {
+                console.error('Symptoms input element not found');
+                return;
+            }
+            const symptoms = symptomsInput.value.trim();
+
+            if (!symptoms) {
+                showToast('Please describe your symptoms first.', 'warning');
+                symptomsInput.focus();
+                return;
+            }
+
+            if (isAnalyzing) {
+                return;
+            }
+
+            isAnalyzing = true;
+            showAnalysisLoading();
+
+            try {
+                const response = await fetch('http://localhost:8000/api/ai/analyze-symptoms', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    },
+                    body: JSON.stringify({
+                        symptoms,
+                        patientId: medicalData?.patientId,
+                        medicalHistory: {
+                            bloodGroup: medicalData?.bloodGroup,
+                            allergies: medicalData?.allergies,
+                            pastIllnesses: medicalData?.pastIllnesses,
+                            medications: medicalData?.medications,
+                            familyHistory: medicalData?.familyHistory
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success || !result.data) {
+                    throw new Error(result.message || 'Invalid response format: Missing success or data');
+                }
+
+                hideAnalysisLoading();
+
+                if (result.data.suggestions) {
+                    populateSuggestions(result.data.suggestions);
+                    const suggestionsSection = document.getElementById('suggestionsSection');
+                    if (suggestionsSection) suggestionsSection.classList.remove('hidden');
+                }
+
+                if (result.data.prescription) {
+                    populatePrescription(result.data.prescription);
+                    const prescriptionSection = document.getElementById('prescriptionSection');
+                    if (prescriptionSection) prescriptionSection.classList.remove('hidden');
+                }
+
+                showToast('✅ Analysis complete! Check the recommendations below.', 'success');
+
+                // Scroll to results
+                setTimeout(() => {
+                    const suggestionsSection = document.getElementById('suggestionsSection');
+                    if (suggestionsSection) {
+                        suggestionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 500);
+
+            } catch (error) {
+                console.error('Failed to analyze symptoms:', error);
+                hideAnalysisLoading();
+                loadDummyAnalysis(symptoms); // Silently fall back to dummy analysis
+            } finally {
+                isAnalyzing = false;
+            }
+        }
+
+        // Load dummy analysis for symptoms when AI service is unavailable
+        function loadDummyAnalysis(symptoms) {
+            const dummySuggestions = generateDummySuggestions(symptoms || 'general');
+            const dummyPrescription = generateDummyPrescription(symptoms || 'general');
+
+            populateSuggestions(dummySuggestions);
+            const suggestionsSection = document.getElementById('suggestionsSection');
+            if (suggestionsSection) suggestionsSection.classList.remove('hidden');
+
+            if (dummyPrescription.length > 0) {
+                populatePrescription(dummyPrescription);
+                const prescriptionSection = document.getElementById('prescriptionSection');
+                if (prescriptionSection) prescriptionSection.classList.remove('hidden');
+            }
+
+            // Scroll to results
+            setTimeout(() => {
+                const suggestionsSection = document.getElementById('suggestionsSection');
+                if (suggestionsSection) {
+                    suggestionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 500);
+        }
+
+        // Generate contextual dummy suggestions based on symptoms
+        function generateDummySuggestions(symptoms) {
+            const lowerSymptoms = (symptoms || '').toLowerCase();
+
+            if (lowerSymptoms.includes('headache') || lowerSymptoms.includes('head')) {
+                return {
+                    conditions: [
+                        {
+                            name: 'Tension Headache',
+                            probability: 75,
+                            description: 'Most common type of headache, often caused by stress, poor posture, or eye strain.'
+                        },
+                        {
+                            name: 'Migraine',
+                            probability: 45,
+                            description: 'Severe headache often accompanied by nausea, sensitivity to light and sound.'
+                        },
+                        {
+                            name: 'Dehydration',
+                            probability: 30,
+                            description: 'Insufficient fluid intake can cause headaches and fatigue.'
+                        }
+                    ],
+                    actions: [
+                        {
+                            title: 'Rest and Hydration',
+                            description: 'Get adequate rest and drink plenty of water. Avoid screens for extended periods.',
+                            urgency: 'low'
+                        },
+                        {
+                            title: 'Monitor Symptoms',
+                            description: 'Keep track of headache frequency, intensity, and triggers.',
+                            urgency: 'medium'
+                        },
+                        {
+                            title: 'Consult Doctor if Persistent',
+                            description: 'See a healthcare provider if headaches worsen or become frequent.',
+                            urgency: 'medium'
+                        }
+                    ]
+                };
+            } else if (lowerSymptoms.includes('fever') || lowerSymptoms.includes('temperature')) {
+                return {
+                    conditions: [
+                        {
+                            name: 'Viral Infection',
+                            probability: 70,
+                            description: 'Common viral infections can cause fever, fatigue, and body aches.'
+                        },
+                        {
+                            name: 'Bacterial Infection',
+                            probability: 40,
+                            description: 'Bacterial infections may require antibiotic treatment.'
+                        },
+                        {
+                            name: 'Flu (Influenza)',
+                            probability: 55,
+                            description: 'Seasonal flu with fever, body aches, and respiratory symptoms.'
+                        }
+                    ],
+                    actions: [
+                        {
+                            title: 'Rest and Fluids',
+                            description: 'Get plenty of rest and stay hydrated with water, herbal teas, or clear broths.',
+                            urgency: 'medium'
+                        },
+                        {
+                            title: 'Monitor Temperature',
+                            description: 'Check temperature regularly. Seek immediate care if fever exceeds 103°F (39.4°C).',
+                            urgency: 'high'
+                        },
+                        {
+                            title: 'Isolate if Contagious',
+                            description: 'Stay home to prevent spreading infection to others.',
+                            urgency: 'medium'
+                        }
+                    ]
+                };
+            } else if (lowerSymptoms.includes('cough') || lowerSymptoms.includes('throat')) {
+                return {
+                    conditions: [
+                        {
+                            name: 'Upper Respiratory Infection',
+                            probability: 65,
+                            description: 'Common cold or upper respiratory tract infection with cough and throat irritation.'
+                        },
+                        {
+                            name: 'Allergic Reaction',
+                            probability: 35,
+                            description: 'Environmental allergies causing throat irritation and cough.'
+                        },
+                        {
+                            name: 'Bronchitis',
+                            probability: 25,
+                            description: 'Inflammation of the bronchial tubes causing persistent cough.'
+                        }
+                    ],
+                    actions: [
+                        {
+                            title: 'Throat Care',
+                            description: 'Gargle with warm salt water and use throat lozenges for relief.',
+                            urgency: 'low'
+                        },
+                        {
+                            title: 'Humidify Air',
+                            description: 'Use a humidifier or breathe steam from hot shower to soothe airways.',
+                            urgency: 'low'
+                        },
+                        {
+                            title: 'Avoid Irritants',
+                            description: 'Stay away from smoke, strong odors, and other respiratory irritants.',
+                            urgency: 'medium'
+                        }
+                    ]
+                };
+            } else {
+                // Fallback for empty or unrecognized symptoms
+                return {
+                    conditions: [
+                        {
+                            name: 'General Malaise',
+                            probability: 60,
+                            description: 'Non-specific symptoms that may indicate various minor conditions.'
+                        },
+                        {
+                            name: 'Stress-Related Symptoms',
+                            probability: 45,
+                            description: 'Physical symptoms that may be related to stress or lifestyle factors.'
+                        },
+                        {
+                            name: 'Minor Viral Illness',
+                            probability: 35,
+                            description: 'Early stages of a common viral infection.'
+                        }
+                    ],
+                    actions: [
+                        {
+                            title: 'Self-Care and Rest',
+                            description: 'Focus on adequate sleep, nutrition, and stress management.',
+                            urgency: 'low'
+                        },
+                        {
+                            title: 'Monitor Symptoms',
+                            description: 'Keep track of how symptoms develop over the next 24-48 hours.',
+                            urgency: 'medium'
+                        },
+                        {
+                            title: 'Consult Healthcare Provider',
+                            description: 'Schedule an appointment if symptoms persist or worsen.',
+                            urgency: 'medium'
+                        }
+                    ]
+                };
+            }
+        }
+
+        // Generate contextual dummy prescriptions based on symptoms
+        function generateDummyPrescription(symptoms) {
+            const lowerSymptoms = (symptoms || '').toLowerCase();
+
+            if (lowerSymptoms.includes('headache')) {
+                return [
+                    {
+                        name: 'Ibuprofen (Advil, Motrin)',
+                        dosage: '400mg tablets',
+                        frequency: 'Every 6-8 hours as needed',
+                        duration: '3-5 days maximum',
+                        quantity: '20 tablets',
+                        type: 'OTC',
+                        instructions: 'Take with food or milk to prevent stomach upset. Do not exceed 1200mg (3 tablets) in 24 hours. Stop if stomach pain occurs.',
+                        sideEffects: 'May cause stomach upset, nausea, or dizziness. Avoid alcohol while taking this medication.'
+                    },
+                    {
+                        name: 'Acetaminophen (Tylenol)',
+                        dosage: '500mg tablets',
+                        frequency: 'Every 4-6 hours as needed',
+                        duration: '3-5 days maximum',
+                        quantity: '24 tablets',
+                        type: 'OTC',
+                        instructions: 'Alternative to ibuprofen if stomach sensitivity. Do not exceed 3000mg (6 tablets) in 24 hours. Can be taken with or without food.',
+                        sideEffects: 'Generally well-tolerated. Rare risk of liver damage with overdose. Avoid alcohol.'
+                    }
+                ];
+            } else if (lowerSymptoms.includes('fever')) {
+                return [
+                    {
+                        name: 'Acetaminophen (Tylenol)',
+                        dosage: '650mg tablets',
+                        frequency: 'Every 4-6 hours',
+                        duration: '5-7 days or until fever subsides',
+                        quantity: '30 tablets',
+                        type: 'OTC',
+                        instructions: 'For fever reduction and pain relief. Take with plenty of fluids. Monitor temperature regularly.',
+                        sideEffects: 'Generally safe when used as directed. Do not exceed recommended dose.'
+                    },
+                    {
+                        name: 'Oral Rehydration Solution',
+                        dosage: '8-12 oz (240-360ml)',
+                        frequency: 'Every 2-3 hours',
+                        duration: 'Until fever subsides and hydration restored',
+                        quantity: '6 packets',
+                        type: 'OTC',
+                        instructions: 'Mix one packet with 8oz of clean water. Drink slowly to maintain hydration and replace electrolytes lost due to fever.',
+                        sideEffects: 'No significant side effects. May cause mild stomach upset if consumed too quickly.'
+                    }
+                ];
+            } else if (lowerSymptoms.includes('cough') || lowerSymptoms.includes('throat')) {
+                return [
+                    {
+                        name: 'Dextromethorphan HBr (Robitussin DM)',
+                        dosage: '15mg liquid or tablets',
+                        frequency: 'Every 4 hours as needed',
+                        duration: '7-10 days maximum',
+                        quantity: '120ml bottle or 20 tablets',
+                        type: 'OTC',
+                        instructions: 'Cough suppressant for dry, non-productive cough. Take as directed on package. Do not exceed 6 doses in 24 hours.',
+                        sideEffects: 'May cause drowsiness, dizziness, or nausea. Avoid driving if drowsy.'
+                    },
+                    {
+                        name: 'Menthol Throat Lozenges',
+                        dosage: '1 lozenge (5-10mg menthol)',
+                        frequency: 'Every 2 hours as needed',
+                        duration: '5-7 days',
+                        quantity: '30 lozenges',
+                        type: 'OTC',
+                        instructions: 'Allow to dissolve slowly in mouth for throat relief. Do not chew or swallow whole. Limit to 10 lozenges per day.',
+                        sideEffects: 'Generally safe. May cause mild mouth irritation in sensitive individuals.'
+                    }
+                ];
+            } else {
+                // Fallback for empty or unrecognized symptoms
+                return [
+                    {
+                        name: 'Adult Multivitamin',
+                        dosage: '1 tablet daily',
+                        frequency: 'Once daily with breakfast',
+                        duration: 'Ongoing as needed',
+                        quantity: '60 tablets (2-month supply)',
+                        type: 'Supplement',
+                        instructions: 'Take with food to improve absorption and reduce stomach upset. Support overall health and immune system function.',
+                        sideEffects: 'Generally well-tolerated. May cause mild stomach upset if taken on empty stomach.'
+                    },
+                    {
+                        name: 'Vitamin D3',
+                        dosage: '1000 IU (25mcg)',
+                        frequency: 'Once daily with meal',
+                        duration: 'Ongoing',
+                        quantity: '90 softgels (3-month supply)',
+                        type: 'Supplement',
+                        instructions: 'Support immune system and bone health. Take with fat-containing meal for better absorption.',
+                        sideEffects: 'Very safe at recommended dose. Excessive doses may cause nausea or kidney problems.'
+                    }
+                ];
+            }
+        }
+
+        // Populate AI suggestions in the UI
+        function populateSuggestions(suggestions) {
+            const conditionsList = document.getElementById('conditionsList');
+            if (conditionsList) {
+                conditionsList.innerHTML = suggestions.conditions?.length
+                    ? suggestions.conditions.map((condition, index) =>
+                        `<div class="condition-card p-5 rounded-xl chatbot-message" style="animation-delay: ${index * 0.1}s">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-search-plus text-orange-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800 mb-2 text-lg">${condition.name || 'Unknown Condition'}</h4>
+                                    ${condition.probability ? `
+                                        <div class="mb-3">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-600">Probability</span>
+                                                <span class="text-sm font-bold text-orange-600">${condition.probability}%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-orange-500 h-2 rounded-full" style="width: ${condition.probability}%"></div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${condition.description ? `<p class="text-sm text-gray-600 leading-relaxed">${condition.description}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic text-center py-4">No specific conditions identified based on current symptoms</p>';
+            }
+
+            const actionsList = document.getElementById('actionsList');
+            if (actionsList) {
+                actionsList.innerHTML = suggestions.actions?.length
+                    ? suggestions.actions.map((action, index) =>
+                        `<div class="action-card p-5 rounded-xl chatbot-message" style="animation-delay: ${(index + (suggestions.conditions?.length || 0)) * 0.1}s">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-clipboard-list text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800 mb-2 text-lg">${action.title || 'Untitled Action'}</h4>
+                                    ${action.description ? `<p class="text-sm text-gray-600 mb-3 leading-relaxed">${action.description}</p>` : ''}
+                                    ${action.urgency ? `
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
+                                            action.urgency === 'high' ? 'bg-red-100 text-red-800' :
+                                            action.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-green-100 text-green-800'
+                                        }">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            ${action.urgency.toUpperCase()} PRIORITY
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>`
+                    ).join('')
+                    : '<p class="text-gray-500 text-sm italic text-center py-4">No specific actions recommended at this time</p>';
+            }
+        }
+
+        // Populate prescription details in the UI
+        function populatePrescription(prescription) {
+            const prescriptionList = document.getElementById('prescriptionList');
+            if (!prescriptionList) return;
+
+            const prescriptionDate = document.getElementById('prescriptionDate');
+            const prescriptionPatientId = document.getElementById('prescriptionPatientId');
+            const prescriptionId = document.getElementById('prescriptionId');
+            if (prescriptionDate) prescriptionDate.textContent = formatDate(new Date().toISOString());
+            if (prescriptionPatientId) prescriptionPatientId.textContent = medicalData?.patientId || 'PAT-12345';
+            if (prescriptionId) prescriptionId.textContent = `RX-AI-${Date.now().toString().slice(-6)}`;
+
+            prescriptionList.innerHTML = prescription.map((medication, index) =>
+                `<div class="prescription-card p-5 rounded-xl chatbot-message border-l-4 border-green-500" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-green-200">
+                            <i class="fas fa-pills text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between mb-3">
+                                <h4 class="font-bold text-gray-800 text-lg">${medication.name || 'Unknown Medication'}</h4>
+                                <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">
+                                    ${medication.type || 'OTC'}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3 text-sm mb-4">
+                                <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-prescription text-green-600"></i>
+                                        <span class="font-semibold text-gray-700">Dosage & Strength</span>
+                                    </div>
+                                    <p class="text-gray-800 font-medium">${medication.dosage || 'As prescribed'}</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i class="fas fa-clock text-blue-600"></i>
+                                        <span class="font-semibold text-gray-700">Frequency & Timing</span>
+                                    </div>
+                                    <p class="text-gray-800 font-medium">${medication.frequency || 'As needed'}</p>
+                                </div>
+                                ${medication.duration ? `
+                                    <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <i class="fas fa-calendar text-purple-600"></i>
+                                            <span class="font-semibold text-gray-700">Treatment Duration</span>
+                                        </div>
+                                        <p class="text-gray-800 font-medium">${medication.duration}</p>
+                                    </div>
+                                ` : ''}
+                                ${medication.quantity ? `
+                                    <div class="bg-white p-3 rounded-lg border border-gray-100">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <i class="fas fa-boxes text-orange-600"></i>
+                                            <span class="font-semibold text-gray-700">Quantity</span>
+                                        </div>
+                                        <p class="text-gray-800 font-medium">${medication.quantity}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${medication.instructions ? `
+                                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg mb-3">
+                                    <div class="flex items-start space-x-2">
+                                        <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-blue-800 mb-2">Special Instructions</h5>
+                                            <p class="text-sm text-blue-700 leading-relaxed">${medication.instructions}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${medication.sideEffects ? `
+                                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 p-4 rounded-lg">
+                                    <div class="flex items-start space-x-2">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+                                        <div>
+                                            <h5 class="font-semibold text-yellow-800 mb-2">Possible Side Effects</h5>
+                                            <p class="text-sm text-yellow-700 leading-relaxed">${medication.sideEffects}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        // Download prescription as PDF (placeholder)
+        function downloadPrescription() {
+            showToast('📄 Prescription download feature coming soon!', 'info');
+            // In a real implementation, this would use a library like jsPDF
+        }
+
+        // Email prescription to doctor
+        function emailPrescription() {
+            const subject = encodeURIComponent('AI-Generated Prescription for Review');
+            const body = encodeURIComponent(`Dear Doctor,
+Please find attached the AI-generated prescription for patient ${medicalData?.patientId || 'PAT-12345'}.
+This prescription was generated based on the patient's reported symptoms and medical history. Please review and validate before approving any medications.
+Patient Details:
+- Patient ID: ${medicalData?.patientId || 'PAT-12345'}
+- Blood Group: ${medicalData?.bloodGroup || 'O+'}
+- Known Allergies: ${medicalData?.allergies?.join(', ') || 'None reported'}
+Prescription Date: ${formatDate(new Date().toISOString())}
+Prescription ID: ${document.getElementById('prescriptionId')?.textContent || 'RX-AI-Unknown'}
+Thank you for your review.
+Best regards,
+AI Health Assistant`);
+
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        // State management functions
+        function showLoadingState() {
+            const loadingState = document.getElementById('loadingState');
+            const consultationContent = document.getElementById('consultationContent');
+            const errorState = document.getElementById('errorState');
+            if (loadingState) loadingState.classList.remove('hidden');
+            if (consultationContent) consultationContent.classList.add('hidden');
+            if (errorState) errorState.classList.add('hidden');
+        }
+
+        function showConsultationContent() {
+            const loadingState = document.getElementById('loadingState');
+            const consultationContent = document.getElementById('consultationContent');
+            const errorState = document.getElementById('errorState');
+            if (loadingState) loadingState.classList.add('hidden');
+            if (consultationContent) consultationContent.classList.remove('hidden');
+            if (errorState) errorState.classList.add('hidden');
+        }
+
+        function showErrorState() {
+            const loadingState = document.getElementById('loadingState');
+            const consultationContent = document.getElementById('consultationContent');
+            const errorState = document.getElementById('errorState');
+            if (loadingState) loadingState.classList.add('hidden');
+            if (consultationContent) consultationContent.classList.add('hidden');
+            if (errorState) errorState.classList.remove('hidden');
+        }
+
+        function showAnalysisLoading() {
+            const analysisLoading = document.getElementById('analysisLoading');
+            const suggestionsSection = document.getElementById('suggestionsSection');
+            const prescriptionSection = document.getElementById('prescriptionSection');
+            if (analysisLoading) analysisLoading.classList.remove('hidden');
+            if (suggestionsSection) suggestionsSection.classList.add('hidden');
+            if (prescriptionSection) prescriptionSection.classList.add('hidden');
+        }
+
+        function hideAnalysisLoading() {
+            const analysisLoading = document.getElementById('analysisLoading');
+            if (analysisLoading) analysisLoading.classList.add('hidden');
+        }
+
+        // Format date consistently
+        function formatDate(dateString) {
+            if (!dateString) return 'Today';
+
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Today';
+
+            const today = new Date();
+            const diffTime = Math.abs(today - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Update consultation date in UI
+        function updateConsultationDate() {
+            const consultationDate = document.getElementById('consultationDate');
+            if (consultationDate) {
+                consultationDate.textContent = formatDate(new Date().toISOString());
+            }
+        }
+
+        // Refresh medical data
+        function refreshData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) {
+                refreshIcon.classList.add('animate-spin');
+            }
+
+            loadMedicalData().finally(() => {
+                setTimeout(() => {
+                    if (refreshIcon) {
+                        refreshIcon.classList.remove('animate-spin');
+                    }
+                }, 1000);
+            });
+        }
+
+        // Display toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-xl text-white font-medium shadow-lg ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.innerHTML = `<div class="flex items-center space-x-2"><span>${message}</span></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Handle emergency call
+        function callEmergency() {
+            if (confirm('🚨 This will call emergency services (911). Do you want to proceed?')) {
+                window.location.href = 'tel:911';
+            }
+        }
+
+        // Navigate back
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

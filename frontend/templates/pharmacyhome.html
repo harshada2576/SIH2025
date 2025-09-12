@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Notifications - Healthcare App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 1s ease-in-out infinite',
+                        'shimmer': 'shimmer 1.5s ease-in-out infinite'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        .mobile-container {
+            max-width: 428px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .prescription-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .prescription-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .prescription-card:active {
+            transform: translateY(0);
+        }
+        
+        .check-button {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .check-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .check-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        
+        .doctor-name {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .notification-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: pulse-gentle 2s infinite;
+        }
+        
+        .scroll-container {
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .refresh-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .prescription-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .floating-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-gentle 2s infinite;
+        }
+        
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="mobile-container mx-auto shadow-2xl">
+        
+        <!-- Header -->
+        <div class="header-gradient px-6 pt-12 pb-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Prescriptions</h1>
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="status-indicator"></div>
+                        <p class="text-white/80 text-sm">Live Updates</p>
+                    </div>
+                </div>
+                <button onclick="showSettings()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-cog text-white"></i>
+                </button>
+            </div>
+            
+            <!-- Prescription Icon -->
+            <div class="flex justify-center mb-4">
+                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center animate-bounce-gentle">
+                    <svg class="w-12 h-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Prescription Pad -->
+                        <rect x="20" y="15" width="60" height="70" fill="#ffffff" rx="4"/>
+                        <rect x="25" y="20" width="50" height="60" fill="#f8fafc" rx="2"/>
+                        <!-- Rx Symbol -->
+                        <text x="30" y="40" font-family="serif" font-size="16" font-weight="bold" fill="#667eea">Rx</text>
+                        <!-- Lines -->
+                        <line x1="30" y1="50" x2="70" y2="50" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="30" y1="58" x2="65" y2="58" stroke="#cbd5e1" stroke-width="2"/>
+                        <line x1="30" y1="66" x2="60" y2="66" stroke="#cbd5e1" stroke-width="2"/>
+                        <!-- Doctor signature line -->
+                        <line x1="45" y1="74" x2="70" y2="74" stroke="#667eea" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <h2 class="text-lg font-semibold mb-2">New Prescriptions</h2>
+                <p class="text-white/80 text-sm">
+                    <span id="notificationCount">Loading...</span> notifications waiting
+                </p>
+            </div>
+        </div>
+
+        <!-- Content Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="px-6 pt-8 pb-6">
+                
+                <!-- Filter Tabs -->
+                <div class="flex space-x-2 mb-6 bg-gray-100 p-1 rounded-xl">
+                    <button onclick="filterPrescriptions('all')" class="filter-tab active flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        All
+                    </button>
+                    <button onclick="filterPrescriptions('urgent')" class="filter-tab flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        Urgent
+                    </button>
+                    <button onclick="filterPrescriptions('today')" class="filter-tab flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        Today
+                    </button>
+                </div>
+                
+                <!-- Prescriptions List -->
+                <div class="scroll-container">
+                    <div id="prescriptionsList" class="space-y-4">
+                        <!-- Loading State -->
+                        <div id="loadingState" class="space-y-4">
+                            <div class="prescription-card rounded-2xl p-6 animate-pulse">
+                                <div class="loading-skeleton h-6 w-3/4 rounded mb-4"></div>
+                                <div class="loading-skeleton h-4 w-1/2 rounded mb-4"></div>
+                                <div class="loading-skeleton h-10 w-32 rounded-xl"></div>
+                            </div>
+                            <div class="prescription-card rounded-2xl p-6 animate-pulse">
+                                <div class="loading-skeleton h-6 w-2/3 rounded mb-4"></div>
+                                <div class="loading-skeleton h-4 w-1/3 rounded mb-4"></div>
+                                <div class="loading-skeleton h-10 w-32 rounded-xl"></div>
+                            </div>
+                            <div class="prescription-card rounded-2xl p-6 animate-pulse">
+                                <div class="loading-skeleton h-6 w-4/5 rounded mb-4"></div>
+                                <div class="loading-skeleton h-4 w-2/5 rounded mb-4"></div>
+                                <div class="loading-skeleton h-10 w-32 rounded-xl"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Prescriptions will be populated here -->
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden text-center py-16 animate-fade-in">
+                        <div class="empty-state rounded-2xl p-8 mx-4">
+                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-prescription-bottle text-gray-400 text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">No Prescriptions</h3>
+                            <p class="text-gray-600 mb-8">You don't have any new prescription notifications at the moment.</p>
+                            <button onclick="refreshPrescriptions()" class="refresh-button text-white px-6 py-3 rounded-xl font-semibold">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="errorState" class="hidden text-center py-16 animate-fade-in">
+                        <div class="empty-state rounded-2xl p-8 mx-4">
+                            <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Connection Error</h3>
+                            <p class="text-gray-600 mb-8">Unable to load prescriptions. Please check your internet connection and try again.</p>
+                            <button onclick="refreshPrescriptions()" class="refresh-button text-white px-6 py-3 rounded-xl font-semibold">
+                                <i class="fas fa-redo mr-2"></i>
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Offline Dummy Data State -->
+                    <div id="offlineState" class="hidden text-center py-16 animate-fade-in">
+                        <div class="empty-state rounded-2xl p-8 mx-4 space-y-6">
+                            <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-wifi text-yellow-500 text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Offline Mode</h3>
+                            <p class="text-gray-600 mb-4">Showing cached data due to connection issues.</p>
+                            <div id="offlinePrescriptionsList" class="space-y-4">
+                                <!-- Dummy prescriptions will be populated here -->
+                            </div>
+                            <button onclick="refreshPrescriptions()" class="refresh-button text-white px-6 py-3 rounded-xl font-semibold">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Retry Connection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Action Button -->
+        <button onclick="showFilters()" class="floating-action fixed bottom-6 right-6 w-14 h-14 rounded-full text-white flex items-center justify-center">
+            <i class="fas fa-filter text-xl"></i>
+        </button>
+    </div>
+
+    <script>
+        let prescriptions = [];
+        let currentFilter = 'all';
+        let isLoading = false;
+        
+        // Dummy offline data
+        const dummyOfflineData = [
+            {
+                prescriptionId: 'OFF001',
+                doctorName: 'DR. SAMPLE',
+                ctaLabel: 'CHECK IT OUT',
+                timestamp: new Date().toISOString(),
+                priority: 'high',
+                medications: ['Sample Medication 500mg', 'Placebo 650mg'],
+                isUrgent: true
+            },
+            {
+                prescriptionId: 'OFF002',
+                doctorName: 'DR. TEST',
+                ctaLabel: 'CHECK IT OUT',
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                priority: 'medium',
+                medications: ['Test Pill 500mg', 'Vitamin X'],
+                isUrgent: false
+            }
+        ];
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPrescriptions();
+            setupPullToRefresh();
+        });
+        
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5000/api';  // Update to your Python backend URL
+        const API_ENDPOINTS = {
+            prescriptions: '/prescriptions/notifications',
+            prescriptionDetail: '/prescriptions'
+        };
+        
+        // Load prescriptions from API
+        async function loadPrescriptions() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            showLoadingState();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.prescriptions}`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Add 'Authorization': `Bearer ${getAuthToken()}` if authentication is needed
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    prescriptions = data.data;
+                    renderPrescriptions();
+                    updateNotificationCount();
+                    hideOfflineState();
+                } else {
+                    throw new Error('Failed to load prescriptions');
+                }
+                
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+                prescriptions = dummyOfflineData; // Load dummy data on failure
+                renderOfflinePrescriptions();
+                showOfflineState();
+                showToast('Showing offline data due to connection error', 'warning');
+            } finally {
+                isLoading = false;
+                hideLoadingState();
+            }
+        }
+        
+        // Render offline prescriptions
+        function renderOfflinePrescriptions() {
+            const container = document.getElementById('offlinePrescriptionsList');
+            const filteredPrescriptions = filterPrescriptionsByType(prescriptions, currentFilter);
+            
+            container.innerHTML = filteredPrescriptions.map((prescription, index) => `
+                <div class="prescription-card ${getPriorityClass(prescription.priority)} rounded-2xl p-6 shadow-sm animate-slide-up" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <h3 class="doctor-name text-lg font-bold">
+                                    PRESCRIPTION FROM ${prescription.doctorName}
+                                </h3>
+                                ${prescription.isUrgent ? '<span class="notification-badge text-xs text-white px-2 py-1 rounded-full">URGENT</span>' : ''}
+                            </div>
+                            <div class="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-clock text-blue-500"></i>
+                                    <span>${formatTimestamp(prescription.timestamp)}</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-pills text-green-500"></i>
+                                    <span>${prescription.medications.length} medication${prescription.medications.length > 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 mb-4">
+                                <p class="font-medium mb-1">Medications:</p>
+                                <p>${prescription.medications.join(', ')}</p>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                                <i class="prescription-icon fas fa-prescription-bottle text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        onclick="viewPrescriptionDetail('${prescription.prescriptionId}')" 
+                        class="check-button w-full text-white py-3 px-6 rounded-xl font-bold text-sm uppercase tracking-wide"
+                    >
+                        <i class="fas fa-eye mr-2"></i>
+                        ${prescription.ctaLabel}
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Render prescriptions (for online mode)
+        function renderPrescriptions() {
+            const container = document.getElementById('prescriptionsList');
+            const filteredPrescriptions = filterPrescriptionsByType(prescriptions, currentFilter);
+            
+            if (filteredPrescriptions.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            hideEmptyState();
+            hideErrorState();
+            
+            container.innerHTML = filteredPrescriptions.map((prescription, index) => `
+                <div class="prescription-card ${getPriorityClass(prescription.priority)} rounded-2xl p-6 shadow-sm animate-slide-up" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <h3 class="doctor-name text-lg font-bold">
+                                    PRESCRIPTION FROM ${prescription.doctorName}
+                                </h3>
+                                ${prescription.isUrgent ? '<span class="notification-badge text-xs text-white px-2 py-1 rounded-full">URGENT</span>' : ''}
+                            </div>
+                            <div class="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-clock text-blue-500"></i>
+                                    <span>${formatTimestamp(prescription.timestamp)}</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-pills text-green-500"></i>
+                                    <span>${prescription.medications.length} medication${prescription.medications.length > 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 mb-4">
+                                <p class="font-medium mb-1">Medications:</p>
+                                <p>${prescription.medications.join(', ')}</p>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                                <i class="prescription-icon fas fa-prescription-bottle text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        onclick="viewPrescriptionDetail('${prescription.prescriptionId}')" 
+                        class="check-button w-full text-white py-3 px-6 rounded-xl font-bold text-sm uppercase tracking-wide"
+                    >
+                        <i class="fas fa-eye mr-2"></i>
+                        ${prescription.ctaLabel}
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Filter prescriptions
+        function filterPrescriptionsByType(prescriptions, filterType) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch (filterType) {
+                case 'urgent':
+                    return prescriptions.filter(p => p.isUrgent);
+                case 'today':
+                    return prescriptions.filter(p => {
+                        const prescriptionDate = new Date(p.timestamp);
+                        return prescriptionDate >= today;
+                    });
+                case 'all':
+                default:
+                    return prescriptions;
+            }
+        }
+        
+        // Filter tabs functionality
+        function filterPrescriptions(filterType) {
+            currentFilter = filterType;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-600');
+            });
+            
+            event.target.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm');
+            event.target.classList.remove('text-gray-600');
+            
+            // Re-render based on current mode
+            if (document.getElementById('offlineState').classList.contains('hidden')) {
+                renderPrescriptions();
+            } else {
+                renderOfflinePrescriptions();
+            }
+        }
+        
+        // View prescription detail
+        async function viewPrescriptionDetail(prescriptionId) {
+            showToast('Opening prescription details...', 'info');
+            
+            // Add loading state to button
+            const button = event.target;
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>LOADING...';
+            button.disabled = true;
+            
+            try {
+                // Optional: Fetch details from backend if needed
+                // const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.prescriptionDetail}/${prescriptionId}`);
+                // const data = await response.json();
+                
+                // Navigate to bill.html with prescription ID
+                window.location.href = `bill.html?prescriptionId=${prescriptionId}`;
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Failed to load details', 'error');
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        }
+        
+        // Show prescription modal (demo, optional if bill.html handles it)
+        function showPrescriptionModal(prescriptionId) {
+            const prescription = prescriptions.find(p => p.prescriptionId === prescriptionId);
+            if (!prescription) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-sm w-full animate-slide-up">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Prescription Details</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Doctor</p>
+                            <p class="font-semibold">${prescription.doctorName}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Prescription ID</p>
+                            <p class="font-semibold">${prescription.prescriptionId}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Medications</p>
+                            <ul class="list-disc list-inside text-sm">
+                                ${prescription.medications.map(med => `<li>${med}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Prescribed</p>
+                            <p class="font-semibold">${formatTimestamp(prescription.timestamp)}</p>
+                        </div>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="w-full mt-6 bg-blue-600 text-white py-3 rounded-xl font-semibold">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Utility functions
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+            
+            if (diffInHours < 1) {
+                return 'Just now';
+            } else if (diffInHours < 24) {
+                return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            } else {
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+        
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'high': return 'priority-high';
+                case 'medium': return 'priority-medium';
+                case 'low': return 'priority-low';
+                default: return '';
+            }
+        }
+        
+        function updateNotificationCount() {
+            const count = prescriptions.length;
+            document.getElementById('notificationCount').textContent = `${count} new`;
+        }
+        
+        // State management
+        function showLoadingState() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('prescriptionsList').innerHTML = document.getElementById('loadingState').outerHTML;
+        }
+        
+        function hideLoadingState() {
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+        
+        function showEmptyState() {
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('prescriptionsList').innerHTML = '';
+        }
+        
+        function hideEmptyState() {
+            document.getElementById('emptyState').classList.add('hidden');
+        }
+        
+        function showErrorState() {
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('prescriptionsList').innerHTML = '';
+        }
+        
+        function hideErrorState() {
+            document.getElementById('errorState').classList.add('hidden');
+        }
+
+        // Offline state management
+        function showOfflineState() {
+            document.getElementById('offlineState').classList.remove('hidden');
+            document.getElementById('prescriptionsList').innerHTML = '';
+            hideEmptyState();
+            hideErrorState();
+        }
+        
+        function hideOfflineState() {
+            document.getElementById('offlineState').classList.add('hidden');
+        }
+        
+        // Refresh functionality
+        function refreshPrescriptions() {
+            showToast('Refreshing prescriptions...', 'info');
+            loadPrescriptions();
+        }
+        
+        // Pull to refresh
+        function setupPullToRefresh() {
+            let startY = 0;
+            let currentY = 0;
+            let isPulling = false;
+            
+            const container = document.querySelector('.scroll-container');
+            
+            container.addEventListener('touchstart', (e) => {
+                if (container.scrollTop === 0) {
+                    startY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!isPulling) return;
+                
+                currentY = e.touches[0].clientY;
+                const pullDistance = currentY - startY;
+                
+                if (pullDistance > 100 && !isLoading) {
+                    refreshPrescriptions();
+                    isPulling = false;
+                }
+            });
+            
+            container.addEventListener('touchend', () => {
+                isPulling = false;
+            });
+        }
+        
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-xl text-white font-medium shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.innerHTML = `<div class="flex items-center space-x-2"><span>${message}</span></div>`;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Navigation functions
+        function goBack() {
+            if (confirm('Go back to main menu?')) {
+                window.history.back();
+            }
+        }
+        
+        function showSettings() {
+            showToast('Settings coming soon!', 'info');
+        }
+        
+        function showFilters() {
+            showToast('Advanced filters coming soon!', 'info');
+        }
+        
+        // Initialize filter tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstTab = document.querySelector('.filter-tab');
+            if (firstTab) {
+                firstTab.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm');
+                firstTab.classList.remove('text-gray-600');
+            }
+        });
+    </script>
+</body>
+</html>

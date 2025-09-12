@@ -3,31 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <script
-      src="https://kit.fontawesome.com/c4aaea8549.js"
-      crossorigin="anonymous"
-    ></script>
+    <title>Health Assistant Dashboard</title>
+    <script src="https://kit.fontawesome.com/c4aaea8549.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts: Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Bootstrap JS (with Popper.js) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
     <style>
       body {
-        background: #f5f5f5;
+        background: linear-gradient(135deg, #e6f0fa, #f5f5f5);
+        font-family: 'Roboto', sans-serif;
+        color: #333;
       }
 
       .navbar {
         justify-content: space-between;
+        background: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1rem 2rem;
       }
       .navbar-center {
         position: absolute;
@@ -35,169 +30,202 @@
         transform: translateX(-50%);
       }
       .main-logo {
-        height: 45px;
+        height: 50px;
         width: auto;
+        transition: transform 0.3s ease;
       }
-      .emergency-btn {
+      .main-logo:hover {
+        transform: scale(1.1);
+      }
+      .emergency-btn, .police-btn {
         background-color: #d32f2f;
         color: white;
-        padding: 12px 14px;
+        padding: 12px 16px;
         font-size: 18px;
+        font-weight: 500;
         border: none;
         border-radius: 8px;
         cursor: pointer;
         display: flex;
-        justify-content: center;
-        display: flex; /* This aligns icon & text horizontally */
-        align-items: center; /* This keeps them vertically centered */
-        gap: 10px; /* Space between icon and text */
-        font-family: "Montserrat", sans-serif;
-        font-weight: 700;
-        transition: 0.3s;
-        margin-bottom: 0px;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.3s, transform 0.2s;
       }
-      .emergency-btn:hover {
+      .emergency-btn:hover, .police-btn:hover {
         background-color: #b71c1c;
+        transform: translateY(-2px);
+      }
+      .emergency-btn:focus, .police-btn:focus {
+        outline: 2px solid #1976d2;
+        outline-offset: 2px;
+      }
+      .police-btn {
+        background-color: #1976d2;
+      }
+      .police-btn:hover {
+        background-color: #1565c0;
       }
       .container {
         margin: auto;
-        margin-bottom: 0px;
-        margin-top: 0px;
+        padding: 1rem;
       }
       .grid-item {
-        position: relative; /* Needed for the overlay title */
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border-radius: 8px;
-        background-color: #bfecac;
+        border-radius: 12px;
+        background-color: #e0f7e9;
         height: 140px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
       }
-
+      .grid-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
       @media (min-width: 768px) {
         .grid-item {
           height: 160px;
         }
       }
-
       @media (min-width: 1200px) {
         .grid-item {
-          height: 250px;
+          height: 200px;
         }
       }
-
       .grid-item img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        opacity: 0.9;
       }
       .grid-title {
         position: absolute;
-        bottom: 0; /* Show title at the bottom */
+        bottom: 0;
         width: 100%;
-        background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
         color: #fff;
         text-align: center;
-        padding: 8px 0;
-        font-size: 1rem;
-        font-weight: bold;
+        padding: 12px 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+      .carousel-wrapper {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin: 1rem 0;
       }
       .carousel img {
-        max-height: 90px; /* Reduce height */
-        object-fit: cover; /* Prevents image distortion */
-        margin: 1px;
+        max-height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .carousel-caption {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 0.9rem;
       }
       .prompt-container {
         position: fixed;
-        bottom: 0px;
+        bottom: 1rem;
         z-index: 1000;
         width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        padding: 10px;
-        max-width: 600px;
-        margin: 2px auto;
+        gap: 12px;
+        padding: 12px;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
         border-radius: 12px;
-        background: #f5f5f5;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
-
       #userPrompt {
         flex: 1;
-        border: none;
+        border: 1px solid #e0e0e0;
         outline: none;
-        padding: 10px 12px;
+        padding: 12px;
         font-size: 16px;
         border-radius: 8px;
         resize: none;
-        min-height: 40px;
-        max-height: 100px;
-        background: #ffffff;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        min-height: 50px;
+        max-height: 120px;
+        background: #f9f9f9;
+        transition: border-color 0.3s;
       }
-
-      /* Mic button */
+      #userPrompt:focus {
+        border-color: #1976d2;
+        box-shadow: 0 0 5px rgba(25, 118, 210, 0.3);
+      }
+      .mic-btn, .send-btn {
+        border: none;
+        color: white;
+        padding: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        font-size: 18px;
+      }
       .mic-btn {
-        background: #c7c5c5;
-        border: none;
-        color: white;
-        padding: 10px 14px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: 0.3s;
-        font-size: 18px;
+        background: #6b7280;
       }
-      .mic-btn:hover {
+      .mic-btn:hover, .mic-btn.listening {
         background: #d32f2f;
+        transform: scale(1.1);
       }
-
-      /* Arrow button */
       .send-btn {
-        background: #007bff;
-        border: none;
-        color: white;
-        padding: 10px 14px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: 0.3s;
-        font-size: 18px;
+        background: #1976d2;
       }
       .send-btn:hover {
-        background: #0056b3;
+        background: #1565c0;
+        transform: scale(1.1);
+      }
+      .mic-btn:focus, .send-btn:focus {
+        outline: 2px solid #1976d2;
+        outline-offset: 2px;
       }
     </style>
   </head>
   <body>
     <nav class="navbar bg-light px-3">
       <!-- Left Icon (Menu) -->
-      <a href="#" class="text-dark fs-4">
+      <a href="#" class="text-dark fs-4" aria-label="Menu">
         <i class="fa fa-bars"></i>
       </a>
 
       <!-- Center Logo -->
       <a href="#" class="navbar-center">
         <img
-          src="https://tse2.mm.bing.net/th/id/OIP.sU7hHaMwmg9VGlhH9rYFMgHaDF?pid=Api&P=0&h=220"
-          alt="Logo"
+          src="https://www.pngmart.com/files/22/Health-Icon-PNG-Image.png"
+          alt="Health Assistant Logo"
           class="main-logo"
         />
       </a>
 
       <!-- Right Icon (Info) -->
-      <a href="#" class="text-dark fs-4">
+      <a href="#" class="text-dark fs-4" aria-label="Information">
         <i class="fa fa-info-circle"></i>
       </a>
     </nav>
 
-    <div class="d-flex justify-content-center">
-      <a href="emergency.html" target="_blank" class="btn emergency-btn">
+    <div class="d-flex justify-content-center gap-3 my-3">
+      <a href="emergency.html" target="_blank" class="btn emergency-btn" aria-label="Emergency Contact">
         <i class="fa-solid fa-fire" style="width: 24px; height: 24px"></i>
-        Emergency</a
-      >
+        Emergency
+      </a>
+      <a href="tel:911" class="btn police-btn" aria-label="Police Contact">
+        <i class="fa-solid fa-shield" style="width: 24px; height: 24px"></i>
+        Police
+      </a>
     </div>
 
     <div class="container my-2">
@@ -205,30 +233,44 @@
         <div
           class="col-6 col-md-3"
           onclick="window.location.href='doc_cat.html'"
+          role="button"
+          aria-label="View Doctors"
         >
           <div class="grid-item">
-            <img src="doctor-anime-image.webp" class="img-fluid" alt="Item 1" />
+            <img
+              src="https://www.pngwing.com/en/free-png-bkaxh/download"
+              class="img-fluid"
+              alt="Cartoon Doctor"
+            />
             <div class="grid-title">Doctors</div>
           </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-3" role="button" aria-label="View Pharmacy">
           <div class="grid-item">
-            <img src="pharmacy-cartoon.png" class="img-fluid" alt="Item 2" />
+            <img
+              src="https://www.pngmart.com/files/22/Pharmacy-PNG-Picture.png"
+              class="img-fluid"
+              alt="Cartoon Pharmacy"
+            />
             <div class="grid-title">Pharmacy</div>
           </div>
         </div>
-        <div class="col-6 col-md-3">
-          <div class="grid-item">
-            <img src="blood-cartoon.png" class="img-fluid" alt="Item 3" />
-            <div class="grid-title">Blood Donars</div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-3" role="button" aria-label="View Blood Donors">
           <div class="grid-item">
             <img
-              src="essential-skill-removebg-preview.png"
+              src="https://www.pngmart.com/files/22/Blood-Donation-PNG-HD.png"
               class="img-fluid"
-              alt="Item 4"
+              alt="Cartoon Blood Donation"
+            />
+            <div class="grid-title">Blood Donors</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3" role="button" aria-label="View Lifeline Skills">
+          <div class="grid-item">
+            <img
+              src="https://www.pngmart.com/files/22/First-Aid-Kit-PNG-HD.png"
+              class="img-fluid"
+              alt="Cartoon First Aid Kit"
             />
             <div class="grid-title">Lifeline Skills</div>
           </div>
@@ -237,17 +279,28 @@
     </div>
 
     <!-- Carousel Wrapper -->
-    <div
-      class="carousel-wrapper my-0 p-3"
-      style="background-color: #f5f5f5; border-radius: 10px"
-    >
+    <div class="carousel-wrapper my-3 p-3">
       <div id="smallCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           <div class="carousel-item active">
-            <img src="C1.png" class="d-block w-100 rounded" alt="Slide 1" />
+            <img
+              src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              class="d-block w-100 rounded"
+              alt="Doctor Consultation"
+            />
+            <div class="carousel-caption d-none d-md-block">
+              <h5>Expert Consultations</h5>
+            </div>
           </div>
           <div class="carousel-item">
-            <img src="C2.png" class="d-block w-100 rounded" alt="Slide 2" />
+            <img
+              src="https://images.unsplash.com/photo-1585435557343-3b0929fb0483?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+              class="d-block w-100 rounded"
+              alt="Medical Technology"
+            />
+            <div class="carousel-caption d-none d-md-block">
+              <h5>Advanced Medical Technology</h5>
+            </div>
           </div>
         </div>
 
@@ -257,6 +310,7 @@
           type="button"
           data-bs-target="#smallCarousel"
           data-bs-slide="prev"
+          aria-label="Previous Slide"
         >
           <span class="carousel-control-prev-icon"></span>
           <span class="visually-hidden">Previous</span>
@@ -266,6 +320,7 @@
           type="button"
           data-bs-target="#smallCarousel"
           data-bs-slide="next"
+          aria-label="Next Slide"
         >
           <span class="carousel-control-next-icon"></span>
           <span class="visually-hidden">Next</span>
@@ -276,8 +331,8 @@
     <div class="prompt-container">
       <textarea
         id="userPrompt"
-        placeholder="Type your message..."
-        aria-label="User prompt"
+        placeholder="Type your health query..."
+        aria-label="Type your health query"
       ></textarea>
 
       <!-- Mic Button -->
@@ -290,57 +345,78 @@
     </div>
 
     <div id="chatOutput" aria-live="polite"></div>
+
+    <script>
+      const textarea = document.getElementById("userPrompt");
+      const micBtn = document.getElementById("micBtn");
+      const sendBtn = document.getElementById("sendBtn");
+      const output = document.getElementById("chatOutput");
+
+      // Check browser support for speech recognition
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+      }
+
+      // Mic button click: start speech recognition
+      if (micBtn) {
+        micBtn.addEventListener("click", () => {
+          if (!recognition) {
+            alert("Speech recognition not supported in this browser.");
+            return;
+          }
+          recognition.start();
+          micBtn.classList.add("listening");
+          if (output) {
+            output.innerHTML = "<p><i>Listening...</i></p>";
+          }
+        });
+      }
+
+      // Speech recognition result
+      if (recognition) {
+        recognition.addEventListener("result", (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (textarea) {
+            textarea.value = transcript;
+          }
+        });
+
+        recognition.addEventListener("end", () => {
+          if (micBtn) {
+            micBtn.classList.remove("listening");
+          }
+        });
+      }
+
+      // Arrow button click: submit text
+      if (sendBtn) {
+        sendBtn.addEventListener("click", () => {
+          if (!textarea) {
+            console.error("Textarea element not found");
+            return;
+          }
+          const text = textarea.value.trim();
+          if (text) {
+            try {
+              const encodedText = encodeURIComponent(text);
+              const targetUrl = `chat_page.html?message=${encodedText}`;
+              window.location.href = encodeURI(targetUrl);
+              textarea.value = "";
+            } catch (error) {
+              console.error("Error navigating to chat page:", error);
+              if (output) {
+                output.innerHTML = "<p><i>Error processing message. Please try again.</i></p>";
+              }
+            }
+          }
+        });
+      }
+    </script>
   </body>
-
-  <script>
-    const textarea = document.getElementById("userPrompt");
-    const micBtn = document.getElementById("micBtn");
-    const sendBtn = document.getElementById("sendBtn");
-    const output = document.getElementById("chatOutput");
-
-    // Check browser support for speech recognition
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US"; // Change for other languages
-    }
-
-    // Mic button click: start speech recognition
-    micBtn.addEventListener("click", () => {
-      if (!recognition) {
-        alert("Speech recognition not supported in this browser.");
-        return;
-      }
-      recognition.start();
-      micBtn.style.background = "#ffa000"; // Indicate listening
-      output.innerHTML = "<p><i>Listening...</i></p>";
-    });
-
-    // Speech recognition result
-    if (recognition) {
-      recognition.addEventListener("result", (event) => {
-        const transcript = event.results[0][0].transcript;
-        textarea.value = transcript;
-        //output.innerHTML = `<p><b>Voice input:</b> ${transcript}</p>`;
-      });
-
-      recognition.addEventListener("end", () => {
-        micBtn.style.background = "#ff5252"; // Reset button color
-      });
-    }
-
-    // Arrow button click: submit text
-    sendBtn.addEventListener("click", () => {
-      const text = textarea.value.trim();
-      if (text) {
-        textarea.value = ""; // Clear input after sending
-        window.location.href =
-          "chat_page.html?message=" + encodeURIComponent(text);
-      }
-    });
-  </script>
 </html>
