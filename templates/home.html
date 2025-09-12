@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script
+      src="https://kit.fontawesome.com/c4aaea8549.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap JS (with Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: #f5f5f5;
+      }
+
+      .navbar {
+        justify-content: space-between;
+      }
+      .navbar-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .main-logo {
+        height: 45px;
+        width: auto;
+      }
+      .emergency-btn {
+        background-color: #d32f2f;
+        color: white;
+        padding: 12px 14px;
+        font-size: 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        display: flex; /* This aligns icon & text horizontally */
+        align-items: center; /* This keeps them vertically centered */
+        gap: 10px; /* Space between icon and text */
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        transition: 0.3s;
+        margin-bottom: 0px;
+      }
+      .emergency-btn:hover {
+        background-color: #b71c1c;
+      }
+      .container {
+        margin: auto;
+        margin-bottom: 0px;
+        margin-top: 0px;
+      }
+      .grid-item {
+        position: relative; /* Needed for the overlay title */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 8px;
+        background-color: #bfecac;
+        height: 140px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
+      }
+
+      @media (min-width: 768px) {
+        .grid-item {
+          height: 160px;
+        }
+      }
+
+      @media (min-width: 1200px) {
+        .grid-item {
+          height: 250px;
+        }
+      }
+
+      .grid-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .grid-title {
+        position: absolute;
+        bottom: 0; /* Show title at the bottom */
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+        color: #fff;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      .carousel img {
+        max-height: 90px; /* Reduce height */
+        object-fit: cover; /* Prevents image distortion */
+        margin: 1px;
+      }
+      .prompt-container {
+        position: fixed;
+        bottom: 0px;
+        z-index: 1000;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        max-width: 600px;
+        margin: 2px auto;
+        border-radius: 12px;
+        background: #f5f5f5;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      #userPrompt {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 10px 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        resize: none;
+        min-height: 40px;
+        max-height: 100px;
+        background: #ffffff;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Mic button */
+      .mic-btn {
+        background: #c7c5c5;
+        border: none;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 18px;
+      }
+      .mic-btn:hover {
+        background: #d32f2f;
+      }
+
+      /* Arrow button */
+      .send-btn {
+        background: #007bff;
+        border: none;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 18px;
+      }
+      .send-btn:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-light px-3">
+      <!-- Left Icon (Menu) -->
+      <a href="#" class="text-dark fs-4">
+        <i class="fa fa-bars"></i>
+      </a>
+
+      <!-- Center Logo -->
+      <a href="#" class="navbar-center">
+        <img
+          src="https://tse2.mm.bing.net/th/id/OIP.sU7hHaMwmg9VGlhH9rYFMgHaDF?pid=Api&P=0&h=220"
+          alt="Logo"
+          class="main-logo"
+        />
+      </a>
+
+      <!-- Right Icon (Info) -->
+      <a href="#" class="text-dark fs-4">
+        <i class="fa fa-info-circle"></i>
+      </a>
+    </nav>
+
+    <div class="d-flex justify-content-center">
+      <a href="emergency.html" target="_blank" class="btn emergency-btn">
+        <i class="fa-solid fa-fire" style="width: 24px; height: 24px"></i>
+        Emergency</a
+      >
+    </div>
+
+    <div class="container my-2">
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="grid-item">
+            <img src="doctor-anime-image.webp" class="img-fluid" alt="Item 1" />
+            <div class="grid-title">Doctors</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="grid-item">
+            <img src="pharmacy-cartoon.png" class="img-fluid" alt="Item 2" />
+            <div class="grid-title">Pharmacy</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="grid-item">
+            <img src="blood-cartoon.png" class="img-fluid" alt="Item 3" />
+            <div class="grid-title">Blood Donars</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="grid-item">
+            <img
+              src="essential-skill-removebg-preview.png"
+              class="img-fluid"
+              alt="Item 4"
+            />
+            <div class="grid-title">Lifeline Skills</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carousel Wrapper -->
+    <div
+      class="carousel-wrapper my-0 p-3"
+      style="background-color: #f5f5f5; border-radius: 10px"
+    >
+      <div id="smallCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="C1.png" class="d-block w-100 rounded" alt="Slide 1" />
+          </div>
+          <div class="carousel-item">
+            <img src="C2.png" class="d-block w-100 rounded" alt="Slide 2" />
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#smallCarousel"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#smallCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="prompt-container">
+      <textarea
+        id="userPrompt"
+        placeholder="Type your message..."
+        aria-label="User prompt"
+      ></textarea>
+
+      <!-- Mic Button -->
+      <button id="micBtn" class="mic-btn" aria-label="Record voice">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+
+      <!-- Arrow Button -->
+      <button id="sendBtn" class="send-btn" aria-label="Send message">➤</button>
+    </div>
+
+    <div id="chatOutput" aria-live="polite"></div>
+  </body>
+
+  <script>
+    const textarea = document.getElementById("userPrompt");
+    const micBtn = document.getElementById("micBtn");
+    const sendBtn = document.getElementById("sendBtn");
+    const output = document.getElementById("chatOutput");
+
+    // Check browser support for speech recognition
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US"; // Change for other languages
+    }
+
+    // Mic button click: start speech recognition
+    micBtn.addEventListener("click", () => {
+      if (!recognition) {
+        alert("Speech recognition not supported in this browser.");
+        return;
+      }
+      recognition.start();
+      micBtn.style.background = "#ffa000"; // Indicate listening
+      output.innerHTML = "<p><i>Listening...</i></p>";
+    });
+
+    // Speech recognition result
+    if (recognition) {
+      recognition.addEventListener("result", (event) => {
+        const transcript = event.results[0][0].transcript;
+        textarea.value = transcript;
+        output.innerHTML = `<p><b>Voice input:</b> ${transcript}</p>`;
+      });
+
+      recognition.addEventListener("end", () => {
+        micBtn.style.background = "#ff5252"; // Reset button color
+      });
+    }
+
+    // Arrow button click: submit text
+    sendBtn.addEventListener("click", () => {
+      const text = textarea.value.trim();
+      if (text) {
+        output.innerHTML = `<p><b>You:</b> ${text}</p>`;
+        textarea.value = ""; // Clear input after sending
+      }
+    });
+  </script>
+</html>
