@@ -1,20 +1,30 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from app.db.database import Base, engine
 from app.api.endpoints import auth, doctor, patient, translate, register
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this in production
+    allow_origins=["*"],  # Replace with actual frontend domain in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Static files and templates
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+templates = Jinja2Templates(directory="frontend/templates")
+
+# DB setup (deferred to startup)
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+
+# Router
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(doctor.router, prefix="/doctor", tags=["doctor"])
 app.include_router(patient.router, prefix="/patient", tags=["patient"])
