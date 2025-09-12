@@ -1,7 +1,9 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from app.db.database import Base, engine
-from app.api.endpoints import auth, doctor, patient, translate
+from app.api.endpoints import auth, doctor, patient, translate, register
+
+app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
@@ -13,10 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app = FastAPI()
-
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(doctor.router, prefix="/doctor", tags=["doctor"])
 app.include_router(patient.router, prefix="/patient", tags=["patient"])
 app.include_router(translate.router, prefix="/utils", tags=["translate"])
+app.include_router(register.router, prefix="/register", tags=["register"])
 
