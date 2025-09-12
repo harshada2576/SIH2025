@@ -6,6 +6,7 @@ from app.schemas.appointment import AppointmentCreate, AppointmentOut
 from app.crud.appointment import create_appointment, get_appointments_by_patient, get_appointments_by_doctor, cancel_appointment
 from app.api.deps import get_current_user
 from app.db.models.user import User
+from app.db.models.doctor import Doctor
 
 router = APIRouter()
 

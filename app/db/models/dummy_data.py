@@ -1,4 +1,5 @@
 # app/db/models/dummy_data
+
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
@@ -7,7 +8,9 @@ from app.db.database import SessionLocal, engine, Base
 from app.db.models.user import User
 from app.db.models.doctor import Doctor
 from app.db.models.patient import Patient
+from app.db.models.pharmacy import Pharmacy
 from app.db.models.appointment import Appointment
+from app.db.models.prescription import Prescription
 from app.core.security import get_password_hash  # Import password hashing
 from datetime import datetime, date
 
@@ -28,6 +31,33 @@ patients = [
     User(username="meena654", email="meena.joshi@example.com", hashed_password=hashed_password, is_doctor=False),
 ]
 
+pharmacies = [
+    Pharmacy(
+        user_id=6,  # New user ID after patients and doctors
+        pharmacy_name="Village Pharmacy",
+        drug_license_number="DL123456",
+        registration_id="PHARM001",
+        address="789 Main Road",
+        city="Pune",
+        state="Maharashtra",
+        pin_code="411001",
+        contact_number="9876543211",
+        email="village.pharmacy@example.com",
+        pharmacist_name="Suresh Gupta",
+        qualification="B.Pharm",
+        pharmacist_registration_number="PRN123",
+        experience="5-10 years",
+        additional_certifications=["Certified Diabetes Educator"],
+        gps_location="18.5204,73.8567",
+        services=["Home Delivery", "Prescription Pickup"],
+        operating_hours={"open": "09:00", "close": "21:00"},
+        additional_notes="Serving rural areas",
+        consent_terms=True,
+        consent_data=True,
+        consent_marketing=False
+    ),
+]
+
 # --- Dummy Doctors (Users) ---
 doctor_users = [
     User(username="anil.verma@clinic.com", email="anil.verma@clinic.com", hashed_password=hashed_password, is_doctor=True),
@@ -35,6 +65,7 @@ doctor_users = [
     User(username="rajesh.kumar@clinic.com", email="rajesh.kumar@clinic.com", hashed_password=hashed_password, is_doctor=True),
     User(username="meera.joshi@clinic.com", email="meera.joshi@clinic.com", hashed_password=hashed_password, is_doctor=True),
     User(username="irfan.shaikh@clinic.com", email="irfan.shaikh@clinic.com", hashed_password=hashed_password, is_doctor=True),
+    User(username="village.pharmacy@example.com", email="village.pharmacy@example.com", hashed_password=hashed_password, is_doctor=False),
 ]
 
 # --- Dummy Doctors ---
@@ -146,8 +177,18 @@ appointments = [
     ),
 ]
 
+prescriptions = [
+    Prescription(
+        patient_id=1,  # Ramesh Patil
+        doctor_id=1,  # Anil Verma
+        pharmacy_id=1,  # Village Pharmacy
+        medications="Paracetamol 500mg, twice daily",
+        status="pending"
+    ),
+]
+
 # Insert patients, doctor users, doctors, appointments, and patients
-db.add_all(patients + doctor_users + doctors + appointments + patients_data)
+db.add_all(patients + doctor_users + doctors + appointments + patients_data + pharmacies + prescriptions)
 db.commit()
 db.close()
 

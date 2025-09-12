@@ -1,6 +1,6 @@
 # app/api/endpoint/doctor.py
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.api.deps import get_current_doctor
@@ -45,3 +45,24 @@ def get_doctors_list(db: Session = Depends(get_db)):
         } for doctor in doctors
     ]
 
+@router.get("/info/{doctor_id}")
+def get_doctor_info(doctor_id: int, db: Session = Depends(get_db)):
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return {
+        "id": doctor.id,
+        "name": f"{doctor.first_name} {doctor.last_name}",
+        "qualification": doctor.qualifications,
+        "experience": f"{doctor.experience} years",
+        "specialization": doctor.specialization,
+        "hospital_name": doctor.hospital_name,
+        "hospital_address": doctor.hospital_address,
+        "contact_number": doctor.phone,
+        "email": doctor.email,
+        "consultation_fee": doctor.consultation_fee,
+        "online_fee": doctor.online_fee,
+        "available_timings": doctor.available_timings,
+        "languages": doctor.languages,
+        "bio": doctor.bio
+    }

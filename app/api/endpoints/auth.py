@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserLogin
 from app.crud import user as crud_user
 from app.db.database import get_db
+from app.db.models.user import User
 from app.core.security import verify_password, create_access_token
+from pydantic import BaseModel
 from datetime import timedelta
 
 router = APIRouter()
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
 
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -35,9 +40,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     
 
 @router.post("/forgot-password")
-def forgot_password(email: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == email).first()
+def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == request.email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Email not found")
-    # Placeholder: Simulate sending reset link
     return {"message": "Reset link sent to your email (simulated for demo)"}
