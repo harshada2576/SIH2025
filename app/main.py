@@ -3,9 +3,9 @@ from fastapi import FastAPI
 from app.db.database import Base, engine
 from app.api.endpoints import auth, doctor, patient, translate, register
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
