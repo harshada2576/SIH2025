@@ -1,0 +1,106 @@
+
+## 🏥 SIH 2025 Project Backend Progress Update
+
+**Contributor:** \[Your Name]
+**Date:** 11th September 2025
+**Module:** Backend (FastAPI)
+
+---
+
+### ✅ Completed Features:
+
+#### 1. 👨‍⚕️ Doctor Registration API
+
+* **Endpoint:** `POST /register/register`
+
+* **Status:** ✅ Working
+
+* **Functionality:**
+
+  * Handles full doctor onboarding (personal, professional, banking, availability, and agreements).
+  * Input validation using Pydantic models.
+  * Automatically parses and stores `date_of_birth` and `available_timings`.
+  * Registration marked as `pending verification` by default.
+  * Stores structured data into normalized SQLAlchemy models.
+
+* **Response on success:**
+
+  ```json
+  {
+    "message": "Registration successful, pending verification",
+    "doctor_id": 1
+  }
+  ```
+
+---
+
+### ⚙️ Technical Details:
+
+* **Framework:** FastAPI
+* **ORM:** SQLAlchemy
+* **DB:** SQLite (for now)
+* **Security:** Passwords hashed before storing
+* **Validation:** Field formats (email, date, lists) verified using Pydantic
+* **Data stored across:**
+
+  * `Doctor` model (includes most fields; modularization planned)
+
+---
+
+### 🛠️ Work In Progress / Next Steps:
+
+#### 1. 🔐 Doctor Login
+
+* JWT-based or session-based authentication planned.
+* Separate endpoint: `POST /auth/login` (under development)
+
+#### 2. 📥 Admin Verification Flow
+
+* Flag (`is_verified`) already included.
+* Simple toggle via admin dashboard or API.
+
+#### 3. 🧑‍🤝‍🧑 Patient Registration & Dashboard
+
+* Similar to doctor flow — to be started next.
+
+#### 4. 🌐 Language Translation API
+
+* Basic setup exists but needs testing/fixes.
+
+---
+
+### 👀 Swagger Docs
+
+* FastAPI interactive docs at:
+  `http://localhost:8000/docs`
+  or
+  `http://127.0.0.1:8000/docs`
+
+---
+
+### 📝 Notes for Frontend Team
+
+* Backend expects:
+
+  * `dateOfBirth`: format `YYYY-MM-DD`
+  * `availableTimings`: a nested dictionary object (not stringified)
+
+    ```json
+    {
+      "monday": ["10-2", "3-4"],
+      "tuesday": ["9-11"]
+    }
+    ```
+  * `languages`: a list of strings (e.g., `["English", "Hindi"]`)
+  * Files are not yet implemented (uploading disabled for now)
+
+---
+
+### ✅ Test Status
+
+* Tested via Swagger UI and curl
+* DB entries confirmed
+* Error handling in place for validation and type mismatch
+
+---
+
