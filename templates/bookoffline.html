@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Offline Appointment - Healthcare Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    .profile-container { max-width: 414px; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+    .info-card { transition: all 0.3s ease; border: 1px solid #e5e7eb; }
+    .info-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .scroll-container { max-height: calc(100vh - 80px); overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .scroll-container::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-gray-50 font-inter">
+  <div class="profile-container mx-auto shadow-2xl">
+
+    <!-- Header -->
+    <div class="px-6 pt-12 pb-6 text-white">
+      <div class="flex items-center justify-between mb-6">
+        <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+          <i class="fas fa-arrow-left text-white"></i>
+        </button>
+        <div class="text-center">
+          <h1 class="text-xl font-bold mb-1">Book Offline Appointment</h1>
+          <p class="text-white/80 text-sm">Schedule with your doctor</p>
+        </div>
+        <div class="w-8 h-8"></div>
+      </div>
+    </div>
+
+    <!-- Booking Content -->
+    <div class="bg-white rounded-t-3xl min-h-screen">
+      <div class="scroll-container px-6 pt-8 pb-6">
+        <div id="bookingContent" class="animate-fade-in">
+          <div class="info-card bg-white rounded-2xl p-6 shadow-sm mb-8">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-calendar-check text-blue-600 mr-2"></i>
+              Appointment Details
+            </h3>
+            <p id="doctorName" class="text-gray-600 mb-4">Dr. John Smith</p>
+            <p id="consultationFee" class="text-gray-600 mb-6"><strong>Consultation Fee:</strong> $150</p>
+
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-clock text-green-600 mr-2"></i>
+              Available Slots
+            </h3>
+            <div id="availableSlots" class="grid grid-cols-2 gap-3 mb-6"></div>
+
+            <button id="payButton" href="pay.html" onclick="processPayment()" class="w-full btn-primary text-white py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2" disabled>
+              <i class="fas fa-credit-card"></i>
+              <span>Pay Now</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let doctorData = { id: 1, firstName: "John", lastName: "Smith", practiceInfo: { consultationFee: 150, consultationHours: "Mon-Fri 9:00 AM - 6:00 PM" } };
+    let selectedSlot = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateBookingData(doctorData);
+    });
+
+    function populateBookingData(data) {
+      document.getElementById("doctorName").textContent = `Dr. ${data.firstName} ${data.lastName}`;
+      document.getElementById("consultationFee").textContent = `Consultation Fee: $${data.practiceInfo.consultationFee}`;
+      generateSlots();
+    }
+
+    function generateSlots() {
+      const slotsContainer = document.getElementById("availableSlots");
+      slotsContainer.innerHTML = "";
+      const today = new Date();
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateStr = date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+        ["10:00 AM", "11:00 AM", "2:00 PM"].forEach(time => {
+          const slotLabel = `${dateStr} - ${time}`;
+          const btn = document.createElement("button");
+          btn.textContent = slotLabel;
+          btn.className = "bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-xl font-medium transition-colors";
+          btn.onclick = () => selectSlot(slotLabel, btn);
+          slotsContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function selectSlot(slotLabel, btn) {
+      selectedSlot = slotLabel;
+      document.querySelectorAll("#availableSlots button").forEach(b => {
+        b.classList.remove("bg-blue-500", "text-white");
+        b.classList.add("bg-gray-100", "text-gray-700");
+      });
+      btn.classList.remove("bg-gray-100", "text-gray-700");
+      btn.classList.add("bg-blue-500", "text-white");
+      document.getElementById("payButton").disabled = false;
+    }
+
+    function processPayment() {
+      if (!selectedSlot) {
+        alert("Please select a slot before paying.");
+        return;
+      }
+      const fee = doctorData.practiceInfo.consultationFee;
+      const doctorId = doctorData.id;
+      const url = `pay.html?doctorId=${doctorId}&slot=${encodeURIComponent(selectedSlot)}&fee=${fee}`;
+      window.location.href = url; // 🔥 Now redirects correctly
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+</html>
