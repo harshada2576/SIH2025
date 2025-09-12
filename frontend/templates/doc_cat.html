@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HealthCare Mobile App</title>
+  <title data-i18n="title">HealthCare Mobile App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-      <link rel="icon" type="image/x-icon" href="logo.jpg">
-
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <!-- Bootstrap CSS for Modal -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- i18next for Translations -->
+  <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -39,15 +42,30 @@
   </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+  <!-- Language Selection Modal -->
+  <div class="modal fade" id="languageModal" tabindex="-1" aria-labelledby="languageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="languageModalLabel" data-i18n="select_language">Select Language</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p data-i18n="choose_language">Choose your preferred language:</p>
+          <button class="btn btn-primary w-100 mb-2" onclick="setLanguage('en')">English</button>
+          <button class="btn btn-primary w-100" onclick="setLanguage('hi')">हिन्दी (Hindi)</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Mobile App Container -->
   <div class="mobile-container mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-
     <!-- Header -->
     <div class="px-6 pt-8 pb-6">
       <div class="text-center mb-8 animate-fade-in">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">HealthCare</h1>
-        <p class="text-gray-600 text-sm">Find the right care for you</p>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2" data-i18n="app_title">HealthCare</h1>
+        <p class="text-gray-600 text-sm" data-i18n="app_subtitle">Find the right care for you</p>
       </div>
 
       <!-- Search Bar -->
@@ -56,6 +74,7 @@
           <i class="fas fa-search text-gray-400 text-lg"></i>
           <input 
             type="text" id="searchInput"
+            data-i18n="[placeholder]search_placeholder"
             placeholder="Search doctors, symptoms, treatments..."
             class="flex-1 bg-transparent text-gray-700 placeholder-gray-400 focus:outline-none text-sm"
             onkeyup="searchDoctors(event)"
@@ -68,7 +87,7 @@
         <!-- Search Results -->
         <div id="searchResults" class="hidden mt-4 bg-white rounded-xl shadow-lg border border-gray-100 max-h-60 overflow-y-auto">
           <div class="p-3">
-            <h4 class="text-sm font-semibold text-gray-700 mb-2">Available Doctors</h4>
+            <h4 class="text-sm font-semibold text-gray-700 mb-2" data-i18n="available_doctors">Available Doctors</h4>
             <div id="doctorsList" class="space-y-2"></div>
           </div>
         </div>
@@ -77,15 +96,15 @@
 
     <!-- Medical Categories Grid -->
     <div class="px-6 pb-8">
-      <h2 class="text-lg font-semibold text-gray-800 mb-6">Medical Categories</h2>
+      <h2 class="text-lg font-semibold text-gray-800 mb-6" data-i18n="medical_categories">Medical Categories</h2>
       <div class="grid grid-cols-2 gap-6">
         <div onclick="openCategory('general')" class="category-icon gradient-pink rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
           <div class="text-center">
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-stethoscope text-pink-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">General Medicine</h3>
-            <p class="text-xs text-gray-600">Primary care</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="general_medicine">General Medicine</h3>
+            <p class="text-xs text-gray-600" data-i18n="general_medicine_desc">Primary care</p>
           </div>
         </div>
         <div onclick="openCategory('dental')" class="category-icon gradient-purple rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
@@ -93,8 +112,8 @@
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-tooth text-purple-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Dental Health</h3>
-            <p class="text-xs text-gray-600">Oral care</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="dental_health">Dental Health</h3>
+            <p class="text-xs text-gray-600" data-i18n="dental_health_desc">Oral care</p>
           </div>
         </div>
         <div onclick="openCategory('eye')" class="category-icon gradient-green rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
@@ -102,8 +121,8 @@
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-eye text-green-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Eye Care</h3>
-            <p class="text-xs text-gray-600">Vision health</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="eye_care">Eye Care</h3>
+            <p class="text-xs text-gray-600" data-i18n="eye_care_desc">Vision health</p>
           </div>
         </div>
         <div onclick="openCategory('ear')" class="category-icon gradient-yellow rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
@@ -111,8 +130,8 @@
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-assistive-listening-systems text-yellow-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Ear Care</h3>
-            <p class="text-xs text-gray-600">Hearing health</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="ear_care">Ear Care</h3>
+            <p class="text-xs text-gray-600" data-i18n="ear_care_desc">Hearing health</p>
           </div>
         </div>
         <div onclick="openCategory('prenatal')" class="category-icon gradient-red rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
@@ -120,8 +139,8 @@
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-baby text-red-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Prenatal Care</h3>
-            <p class="text-xs text-gray-600">Pregnancy care</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="prenatal_care">Prenatal Care</h3>
+            <p class="text-xs text-gray-600" data-i18n="prenatal_care_desc">Pregnancy care</p>
           </div>
         </div>
         <div onclick="openCategory('cardiology')" class="category-icon gradient-orange rounded-3xl p-6 cursor-pointer animate-bounce-gentle">
@@ -129,8 +148,8 @@
             <div class="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
               <i class="fas fa-heartbeat text-orange-600 text-2xl"></i>
             </div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Cardiology</h3>
-            <p class="text-xs text-gray-600">Heart health</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="cardiology">Cardiology</h3>
+            <p class="text-xs text-gray-600" data-i18n="cardiology_desc">Heart health</p>
           </div>
         </div>
       </div>
@@ -141,11 +160,11 @@
       <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-semibold text-gray-800 text-sm mb-1">Need immediate help?</h3>
-            <p class="text-xs text-gray-600">24/7 emergency support</p>
+            <h3 class="font-semibold text-gray-800 text-sm mb-1" data-i18n="emergency_title">Need immediate help?</h3>
+            <p class="text-xs text-gray-600" data-i18n="emergency_desc">24/7 emergency support</p>
           </div>
           <button onclick="callEmergency()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-            <i class="fas fa-phone mr-1"></i> Emergency
+            <i class="fas fa-phone mr-1"></i> <span data-i18n="emergency_button">Emergency</span>
           </button>
         </div>
       </div>
@@ -169,6 +188,89 @@
   </div>
 
   <script>
+    // Initialize i18next
+    i18next.init({
+      lng: 'en',
+      resources: {
+        en: {
+          translation: {
+            title: "HealthCare Mobile App",
+            select_language: "Select Language",
+            choose_language: "Choose your preferred language:",
+            app_title: "HealthCare",
+            app_subtitle: "Find the right care for you",
+            search_placeholder: "Search doctors, symptoms, treatments...",
+            available_doctors: "Available Doctors",
+            medical_categories: "Medical Categories",
+            general_medicine: "General Medicine",
+            general_medicine_desc: "Primary care",
+            dental_health: "Dental Health",
+            dental_health_desc: "Oral care",
+            eye_care: "Eye Care",
+            eye_care_desc: "Vision health",
+            ear_care: "Ear Care",
+            ear_care_desc: "Hearing health",
+            prenatal_care: "Prenatal Care",
+            prenatal_care_desc: "Pregnancy care",
+            cardiology: "Cardiology",
+            cardiology_desc: "Heart health",
+            emergency_title: "Need immediate help?",
+            emergency_desc: "24/7 emergency support",
+            emergency_button: "Emergency"
+          }
+        },
+        hi: {
+          translation: {
+            title: "हेल्थकेयर मोबाइल ऐप",
+            select_language: "भाषा चुनें",
+            choose_language: "अपनी पसंदीदा भाषा चुनें:",
+            app_title: "हेल्थकेयर",
+            app_subtitle: "आपके लिए सही देखभाल खोजें",
+            search_placeholder: "डॉक्टर, लक्षण, उपचार खोजें...",
+            available_doctors: "उपलब्ध डॉक्टर",
+            medical_categories: "चिकित्सा श्रेणियाँ",
+            general_medicine: "सामान्य चिकित्सा",
+            general_medicine_desc: "प्राथमिक देखभाल",
+            dental_health: "दंत स्वास्थ्य",
+            dental_health_desc: "मौखिक देखभाल",
+            eye_care: "नेत्र देखभाल",
+            eye_care_desc: "दृष्टि स्वास्थ्य",
+            ear_care: "कान की देखभाल",
+            ear_care_desc: "श्रवण स्वास्थ्य",
+            prenatal_care: "प्रसवपूर्व देखभाल",
+            prenatal_care_desc: "गर्भावस्था देखभाल",
+            cardiology: "हृदय रोग",
+            cardiology_desc: "हृदय स्वास्थ्य",
+            emergency_title: "तत्काल मदद चाहिए?",
+            emergency_desc: "24/7 आपातकालीन सहायता",
+            emergency_button: "आपातकाल"
+          }
+        }
+      }
+    }, function(err, t) {
+      updateContent();
+    });
+
+    function updateContent() {
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (key.startsWith('[placeholder]')) {
+          const actualKey = key.replace('[placeholder]', '');
+          element.placeholder = i18next.t(actualKey);
+        } else {
+          element.textContent = i18next.t(key);
+        }
+      });
+    }
+
+    function setLanguage(lang) {
+      i18next.changeLanguage(lang, () => {
+        updateContent();
+        localStorage.setItem('language', lang);
+        document.getElementById('languageModal').querySelector('.btn-close').click();
+      });
+    }
+
     // Auth & user setup
     const authToken = localStorage.getItem("authToken") || "demo-auth-token";
     const apiKey = "your-api-key";
@@ -191,16 +293,16 @@
     // Category selection
     async function openCategory(category) {
       const categories = {
-        general: { name: "General Medicine", description: "Primary care and family medicine" },
-        dental: { name: "Dental Health", description: "Oral care and dental treatments" },
-        eye: { name: "Eye Care", description: "Vision health and ophthalmology" },
-        ear: { name: "Ear Care", description: "Hearing health and ENT services" },
-        prenatal: { name: "Prenatal Care", description: "Pregnancy care and obstetrics" },
-        cardiology: { name: "Cardiology", description: "Heart health and cardiac care" }
+        general: { name: i18next.t("general_medicine"), description: i18next.t("general_medicine_desc") },
+        dental: { name: i18next.t("dental_health"), description: i18next.t("dental_health_desc") },
+        eye: { name: i18next.t("eye_care"), description: i18next.t("eye_care_desc") },
+        ear: { name: i18next.t("ear_care"), description: i18next.t("ear_care_desc") },
+        prenatal: { name: i18next.t("prenatal_care"), description: i18next.t("prenatal_care_desc") },
+        cardiology: { name: i18next.t("cardiology"), description: i18next.t("cardiology_desc") }
       };
 
       const categoryData = categories[category];
-      showToast("Loading...", `Connecting to ${categoryData.name} services...`, "info");
+      showToast(i18next.t("loading"), i18next.t("connecting_to", { name: categoryData.name }), "info");
 
       const location = await getUserLocation();
       const requestData = {
@@ -226,15 +328,15 @@
 
         if (response.ok) {
           const result = await response.json();
-          showToast("Success!", `Found ${result.doctorCount || "25+"} ${categoryData.name} specialists near you`, "success");
+          showToast(i18next.t("success"), i18next.t("found_doctors", { count: result.doctorCount || "25+", name: categoryData.name }), "success");
           setTimeout(() => displayCategoryDoctors(category, result.doctors || []), 1000);
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
       } catch (error) {
         console.error("Backend API Error:", error);
-        showToast("Demo Mode", `Showing sample ${categoryData.name} doctors (Backend unavailable)`, "warning");
-        const demoResponse = { doctorCount: Math.floor(Math.random()*20)+10, doctors: getDoctorsByCategory(category), success:true };
+        showToast(i18next.t("demo_mode"), i18next.t("showing_sample", { name: categoryData.name }), "warning");
+        const demoResponse = { doctorCount: Math.floor(Math.random()*20)+10, doctors: getDoctorsByCategory(category), success: true };
         setTimeout(() => displayCategoryDoctors(category, demoResponse.doctors), 1000);
       }
     }
@@ -269,17 +371,22 @@
     function displayCategoryDoctors(category, doctorsList) {
       const searchResults = document.getElementById("searchResults");
       const doctorsListElement = document.getElementById("doctorsList");
-      if (doctorsList.length===0) { showToast("No Results","No doctors found in this category.","warning"); return; }
-      doctorsListElement.innerHTML="";
-      const headerElement=document.createElement("div");
-      headerElement.className="mb-3 pb-2 border-b border-gray-200";
-      headerElement.innerHTML=`<h4 class="text-sm font-semibold text-gray-700">${category} Specialists</h4><p class="text-xs text-gray-500">${doctorsList.length} doctors available</p>`;
+      if (doctorsList.length === 0) {
+        showToast(i18next.t("no_results"), i18next.t("no_doctors_found"), "warning");
+        return;
+      }
+      doctorsListElement.innerHTML = "";
+      const headerElement = document.createElement("div");
+      headerElement.className = "mb-3 pb-2 border-b border-gray-200";
+      headerElement.innerHTML = `
+        <h4 class="text-sm font-semibold text-gray-700">${i18next.t(category + "_specialists")}</h4>
+        <p class="text-xs text-gray-500">${i18next.t("doctors_available", { count: doctorsList.length })}</p>`;
       doctorsListElement.appendChild(headerElement);
-      doctorsList.forEach(doctor=>{
-        const doctorElement=document.createElement("div");
-        doctorElement.className="flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors border border-gray-100 mb-2";
-        doctorElement.onclick=()=>selectDoctorFromCategory(doctor,category);
-        doctorElement.innerHTML=`
+      doctorsList.forEach(doctor => {
+        const doctorElement = document.createElement("div");
+        doctorElement.className = "flex items-center space-x-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors border border-gray-100 mb-2";
+        doctorElement.onclick = () => selectDoctorFromCategory(doctor, category);
+        doctorElement.innerHTML = `
           <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
             <i class="fas fa-user-md text-white"></i>
           </div>
@@ -289,7 +396,7 @@
             <p class="text-xs text-gray-500">${doctor.location}</p>
           </div>
           <div class="text-right">
-            <button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-600 transition-colors">Book Now</button>
+            <button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-600 transition-colors" data-i18n="book_now">Book Now</button>
           </div>`;
         doctorsListElement.appendChild(doctorElement);
       });
@@ -297,11 +404,8 @@
     }
 
     // Doctor selection
-    
-          // Doctor selection
     async function selectDoctorFromCategory(doctor, category) {
       const location = await getUserLocation();
-
       const selectionData = {
         doctorId: doctor.id || `doc_${Math.random().toString(36).substr(2, 9)}`,
         doctorName: doctor.name,
@@ -325,13 +429,13 @@
         });
 
         if (response.ok) {
-          showToast("Doctor Selected", `${doctor.name} selected. Redirecting to booking...`, "success");
+          showToast(i18next.t("doctor_selected"), i18next.t("doctor_selected_message", { name: doctor.name }), "success");
         } else {
           throw new Error("Selection failed");
         }
       } catch (error) {
         console.error("Selection API Error:", error);
-        showToast("Demo Mode", `${doctor.name} selected (Demo mode)`, "success");
+        showToast(i18next.t("demo_mode"), i18next.t("doctor_selected_demo", { name: doctor.name }), "success");
       }
 
       document.getElementById("searchResults").classList.add("hidden");
@@ -340,7 +444,7 @@
 
     // Search functions
     function searchDoctors(event) {
-      const searchTerm = event.target.value.toLowerCase().trim();
+      const searchTerm = event.target.value.trim();
       const searchResults = document.getElementById("searchResults");
       const doctorsList = document.getElementById("doctorsList");
 
@@ -350,14 +454,16 @@
       }
 
       if (event.key === "Enter") {
-        performSearch(searchTerm);
+        const encodedText = encodeURIComponent(searchTerm);
+        const targetUrl = `chat_page.html?message=${encodedText}&lang=${i18next.language}`;
+        window.location.href = encodeURI(targetUrl);
         return;
       }
 
       const filteredDoctors = doctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(searchTerm) ||
-        doctor.specialty.toLowerCase().includes(searchTerm) ||
-        doctor.location.toLowerCase().includes(searchTerm)
+        doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
       if (filteredDoctors.length > 0) {
@@ -389,15 +495,35 @@
 
     function performSearch(searchTerm) {
       document.getElementById("searchResults").classList.add("hidden");
-      showToast("Search Results", `Searching for "${searchTerm}"...`, "info");
+      showToast(i18next.t("search_results"), i18next.t("searching_for", { term: searchTerm }), "info");
     }
 
     function handleVoiceSearch() {
-      showToast("Voice Search", "Listening... Please describe your symptoms.", "info");
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast(i18next.t("error"), i18next.t("speech_not_supported"), "warning");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = i18next.language === 'hi' ? 'hi-IN' : 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.start();
+      showToast(i18next.t("voice_search"), i18next.t("listening"), "info");
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("searchInput").value = transcript;
+        const encodedText = encodeURIComponent(transcript);
+        const targetUrl = `chat_page.html?message=${encodedText}&lang=${i18next.language}`;
+        window.location.href = encodeURI(targetUrl);
+      };
+      recognition.onend = () => {
+        hideToast();
+      };
     }
 
     function callEmergency() {
-      showToast("Emergency Alert", "Connecting to emergency services...", "danger");
+      showToast(i18next.t("emergency_alert"), i18next.t("connecting_emergency"), "danger");
     }
 
     // Toast notification system
@@ -428,11 +554,83 @@
 
     // Init
     document.addEventListener("DOMContentLoaded", () => {
+      // Show language modal
+      const languageModal = new bootstrap.Modal(document.getElementById('languageModal'), { backdrop: 'static', keyboard: false });
+      const savedLang = localStorage.getItem('language');
+      if (savedLang) {
+        setLanguage(savedLang);
+      } else {
+        languageModal.show();
+      }
+
+      // Initial toast
       setTimeout(() => {
-        showToast("Welcome to HealthCare", "Your personal health companion is ready!", "success");
+        showToast(i18next.t("welcome"), i18next.t("welcome_message"), "success");
       }, 500);
+
+      // Add translations for dynamic content
+      i18next.addResourceBundle('en', 'translation', {
+        loading: "Loading...",
+        connecting_to: "Connecting to {{name}} services...",
+        success: "Success!",
+        found_doctors: "Found {{count}} {{name}} specialists near you",
+        demo_mode: "Demo Mode",
+        showing_sample: "Showing sample {{name}} doctors (Backend unavailable)",
+        no_results: "No Results",
+        no_doctors_found: "No doctors found in this category.",
+        general_specialists: "General Medicine Specialists",
+        dental_specialists: "Dental Health Specialists",
+        eye_specialists: "Eye Care Specialists",
+        ear_specialists: "Ear Care Specialists",
+        prenatal_specialists: "Prenatal Care Specialists",
+        cardiology_specialists: "Cardiology Specialists",
+        doctors_available: "{{count}} doctors available",
+        doctor_selected: "Doctor Selected",
+        doctor_selected_message: "{{name}} selected. Redirecting to booking...",
+        doctor_selected_demo: "{{name}} selected (Demo mode)",
+        search_results: "Search Results",
+        searching_for: "Searching for \"{{term}}\"...",
+        voice_search: "Voice Search",
+        listening: "Listening... Please describe your symptoms.",
+        error: "Error",
+        speech_not_supported: "Speech recognition not supported in this browser.",
+        emergency_alert: "Emergency Alert",
+        connecting_emergency: "Connecting to emergency services...",
+        book_now: "Book Now"
+      });
+
+      i18next.addResourceBundle('hi', 'translation', {
+        loading: "लोड हो रहा है...",
+        connecting_to: "{{name}} सेवाओं से जोड़ रहा है...",
+        success: "सफलता!",
+        found_doctors: "आपके पास {{count}} {{name}} विशेषज्ञ मिले",
+        demo_mode: "डेमो मोड",
+        showing_sample: "नमूना {{name}} डॉक्टर दिखा रहा है (बैकएंड अनुपलब्ध)",
+        no_results: "कोई परिणाम नहीं",
+        no_doctors_found: "इस श्रेणी में कोई डॉक्टर नहीं मिला।",
+        general_specialists: "सामान्य चिकित्सा विशेषज्ञ",
+        dental_specialists: "दंत स्वास्थ्य विशेषज्ञ",
+        eye_specialists: "नेत्र देखभाल विशेषज्ञ",
+        ear_specialists: "कान की देखभाल विशेषज्ञ",
+        prenatal_specialists: "प्रसवपूर्व देखभाल विशेषज्ञ",
+        cardiology_specialists: "हृदय रोग विशेषज्ञ",
+        doctors_available: "{{count}} डॉक्टर उपलब्ध",
+        doctor_selected: "डॉक्टर चयनित",
+        doctor_selected_message: "{{name}} चयनित। बुकिंग के लिए रीडायरेक्ट कर रहा है...",
+        doctor_selected_demo: "{{name}} चयनित (डेमो मोड)",
+        search_results: "खोज परिणाम",
+        searching_for: "\"{{term}}\" के लिए खोज रहा है...",
+        voice_search: "आवाज खोज",
+        listening: "सुन रहा है... कृपया अपने लक्षणों का वर्णन करें।",
+        error: "त्रुटि",
+        speech_not_supported: "इस ब्राउज़र में आवाज पहचान समर्थित नहीं है।",
+        emergency_alert: "आपातकालीन चेतावनी",
+        connecting_emergency: "आपातकालीन सेवाओं से जोड़ रहा है...",
+        book_now: "अभी बुक करें"
+      });
     });
   </script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
