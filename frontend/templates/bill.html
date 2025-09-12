@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Price Comparison - SEWASAATHI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 1s ease-in-out infinite',
+                        'shimmer': 'shimmer 1.5s ease-in-out infinite',
+                        'scale-in': 'scaleIn 0.3s ease-out'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .mobile-container {
+            max-width: 428px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .medicine-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .medicine-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .medicine-card.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 2px solid #3b82f6;
+            backdrop-filter: blur(10px);
+        }
+        
+        .upload-button, .pay-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .upload-button:hover, .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
+        }
+        
+        .upload-button:active, .pay-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5);
+        }
+        
+        .scroll-container {
+            max-height: calc(100vh - 320px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .price-badge-low {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .price-badge-medium {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .price-badge-high {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .best-price {
+            position: relative;
+        }
+        
+        .best-price::before {
+            content: "BEST PRICE";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            z-index: 10;
+        }
+        
+        .header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .search-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .medicine-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .savings-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: pulse-gentle 2s infinite;
+        }
+        
+        .stock-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .in-stock {
+            background: #10b981;
+        }
+        
+        .low-stock {
+            background: #f59e0b;
+        }
+        
+        .out-of-stock {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="mobile-container mx-auto shadow-2xl">
+        
+        <!-- Header -->
+        <div class="header-gradient px-6 pt-12 pb-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors" aria-label="Go back">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Medicine Comparison</h1>
+                    <p class="text-white/80 text-sm">Find the best prices</p>
+                </div>
+                <button onclick="showFilters()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors" aria-label="Show filters">
+                    <i class="fas fa-filter text-white"></i>
+                </button>
+            </div>
+            
+            <!-- Medicine Icon -->
+            <div class="flex justify-center mb-4">
+                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center animate-bounce-gentle">
+                    <svg class="w-12 h-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Medicine icon">
+                        <rect x="35" y="25" width="30" height="50" fill="#ffffff" rx="4"/>
+                        <rect x="32" y="20" width="36" height="10" fill="#ffffff" rx="2"/>
+                        <circle cx="42" cy="35" r="3" fill="#667eea"/>
+                        <circle cx="50" cy="42" r="3" fill="#764ba2"/>
+                        <circle cx="58" cy="35" r="3" fill="#667eea"/>
+                        <circle cx="45" cy="52" r="3" fill="#764ba2"/>
+                        <circle cx="55" cy="52" r="3" fill="#667eea"/>
+                        <rect x="37" y="60" width="26" height="8" fill="#e2e8f0" rx="1"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="px-6 pt-8 pb-6">
+                
+                <!-- Search Bar -->
+                <div class="search-container rounded-2xl p-4 mb-6 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-search text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Search medicines..." 
+                            class="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                            oninput="searchMedicines()"
+                            aria-label="Search medicines"
+                        >
+                        <button onclick="clearSearch()" class="text-gray-400 hover:text-gray-600" aria-label="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Summary Box -->
+                <div id="summaryBox" class="summary-box rounded-2xl p-6 mb-6 shadow-sm animate-fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="sortByPrice('low')" class="p-2 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors" title="Sort by lowest price" aria-label="Sort by lowest price">
+                                <i class="fas fa-sort-amount-down text-blue-600 text-sm"></i>
+                            </button>
+                            <button onclick="sortByPrice('high')" class="p-2 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors" title="Sort by highest price" aria-label="Sort by highest price">
+                                <i class="fas fa-sort-amount-up text-blue-600 text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="summaryContent" class="space-y-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">Total Medicines:</span>
+                            <span id="totalCount" class="font-semibold">Loading...</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">Average Price:</span>
+                            <span id="averagePrice" class="font-semibold">Loading...</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-600">Selected:</span>
+                            <span id="selectedCount" class="font-semibold text-blue-600">0</span>
+                        </div>
+                    </div>
+                    
+                    <div id="summaryList" class="mt-4 pt-4 border-t border-gray-200">
+                        <!-- Selected medicines will appear here -->
+                    </div>
+
+                    <!-- Proceed to Pay Button -->
+                    <button id="proceedToPay" onclick="proceedToPayment()" class="pay-button w-full mt-4 text-white py-3 px-6 rounded-xl font-bold text-sm uppercase tracking-wide hidden" aria-label="Proceed to payment">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Proceed to Pay
+                    </button>
+                </div>
+                
+                <!-- Medicines List -->
+                <div class="scroll-container">
+                    <div id="medicinesList" class="space-y-4">
+                        <!-- Loading State -->
+                        <div id="loadingState" class="space-y-4">
+                            <div class="medicine-card rounded-2xl p-6 animate-pulse">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="loading-skeleton h-6 w-3/4 rounded mb-2"></div>
+                                        <div class="loading-skeleton h-4 w-1/2 rounded"></div>
+                                    </div>
+                                    <div class="loading-skeleton h-8 w-16 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="medicine-card rounded-2xl p-6 animate-pulse">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="loading-skeleton h-6 w-2/3 rounded mb-2"></div>
+                                        <div class="loading-skeleton h-4 w-1/3 rounded"></div>
+                                    </div>
+                                    <div class="loading-skeleton h-8 w-16 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="medicine-card rounded-2xl p-6 animate-pulse">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <div class="loading-skeleton h-6 w-4/5 rounded mb-2"></div>
+                                        <div class="loading-skeleton h-4 w-2/5 rounded"></div>
+                                    </div>
+                                    <div class="loading-skeleton h-8 w-16 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden text-center py-16 animate-fade-in">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-pills text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">No Medicines Found</h3>
+                        <p class="text-gray-600 mb-8">Try adjusting your search or add new medicines.</p>
+                        <button onclick="clearSearch()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold" aria-label="Clear search">
+                            <i class="fas fa-search mr-2"></i>
+                            Clear Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Add Button -->
+        <button onclick="addNewMedicine()" class="add-button fixed bottom-32 right-6 w-14 h-14 rounded-full text-white flex items-center justify-center" aria-label="Add new medicine">
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+        
+        <!-- Upload Button -->
+        <div class="fixed bottom-6 left-6 right-6 max-w-sm mx-auto">
+            <button onclick="uploadPrescription()" class="upload-button w-full text-white py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3" aria-label="Upload prescription">
+                <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                <span>Upload Prescription</span>
+                <i class="fas fa-arrow-up text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let medicines = [];
+        let selectedMedicines = [];
+        let filteredMedicines = [];
+        let isLoading = false;
+
+        // Demo data for fallback
+        const demoData = {
+            success: true,
+            medicines: [
+                {
+                    id: 'MED001',
+                    name: 'Medico',
+                    price: 45,
+                    originalPrice: 55,
+                    stock: 'in-stock',
+                    manufacturer: 'PharmaCorp',
+                    description: 'Pain relief medication'
+                },
+                {
+                    id: 'MED002',
+                    name: 'HealthPlus',
+                    price: 48,
+                    originalPrice: 50,
+                    stock: 'in-stock',
+                    manufacturer: 'MediLife',
+                    description: 'Anti-inflammatory tablets'
+                },
+                {
+                    id: 'MED003',
+                    name: 'GenericMed',
+                    price: 50,
+                    originalPrice: 60,
+                    stock: 'low-stock',
+                    manufacturer: 'Generic Labs',
+                    description: 'Generic pain reliever'
+                },
+                {
+                    id: 'MED004',
+                    name: 'PharmaPlus',
+                    price: 42,
+                    originalPrice: 52,
+                    stock: 'in-stock',
+                    manufacturer: 'PharmaPlus Ltd',
+                    description: 'Fast-acting pain relief'
+                },
+                {
+                    id: 'MED005',
+                    name: 'MediCare',
+                    price: 55,
+                    originalPrice: 65,
+                    stock: 'in-stock',
+                    manufacturer: 'MediCare Inc',
+                    description: 'Premium pain medication'
+                },
+                {
+                    id: 'MED006',
+                    name: 'QuickHeal',
+                    price: 38,
+                    originalPrice: 45,
+                    stock: 'out-of-stock',
+                    manufacturer: 'QuickHeal Pharma',
+                    description: 'Rapid pain relief'
+                },
+                {
+                    id: 'MED007',
+                    name: 'WellnessPro',
+                    price: 52,
+                    originalPrice: 58,
+                    stock: 'in-stock',
+                    manufacturer: 'Wellness Corp',
+                    description: 'Professional grade medication'
+                }
+            ],
+            summary: [
+                'Medico', 'HealthPlus', 'GenericMed', 'PharmaPlus', 'MediCare'
+            ],
+            uploadAction: 'prescription_upload'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded triggered');
+            // Initialize with demo data to ensure content displays
+            medicines = demoData.medicines;
+            filteredMedicines = [...medicines];
+            renderMedicines();
+            updateSummary();
+            loadMedicines(); // Attempt to fetch real data
+        });
+
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const API_ENDPOINTS = {
+            medicines: '/medicines/compare',
+            upload: '/prescriptions/upload'
+        };
+
+        // Load medicines from API
+        async function loadMedicines() {
+            if (isLoading) return;
+
+            isLoading = true;
+            showLoadingState();
+            console.log('Loading medicines from API...');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.medicines}`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('API response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('API response data:', data);
+
+                if (data.success && data.medicines && data.medicines.length > 0) {
+                    medicines = data.medicines;
+                    filteredMedicines = [...medicines];
+                    console.log('API data loaded:', medicines);
+                    renderMedicines();
+                    updateSummary();
+                } else {
+                    throw new Error('No medicines available');
+                }
+
+            } catch (error) {
+                console.error('Error loading medicines:', error);
+                medicines = demoData.medicines;
+                filteredMedicines = [...medicines];
+                console.log('Using demo data:', medicines);
+                renderMedicines();
+                updateSummary();
+                showToast('Showing demo data due to connection error', 'warning');
+            } finally {
+                isLoading = false;
+                hideLoadingState();
+                console.log('Loading state hidden');
+            }
+        }
+
+        // Render medicines
+        function renderMedicines() {
+            console.log('Rendering medicines:', filteredMedicines);
+            const container = document.getElementById('medicinesList');
+
+            if (filteredMedicines.length === 0) {
+                console.log('No filtered medicines, showing empty state');
+                showEmptyState();
+                return;
+            }
+
+            hideEmptyState();
+
+            const cheapestPrice = Math.min(...filteredMedicines.map(m => m.price));
+
+            container.innerHTML = filteredMedicines.map((medicine, index) => {
+                const savings = medicine.originalPrice - medicine.price;
+                const savingsPercent = Math.round((savings / medicine.originalPrice) * 100);
+                const isBestPrice = medicine.price === cheapestPrice;
+                const isSelected = selectedMedicines.includes(medicine.id);
+
+                return `
+                    <div class="medicine-card ${isBestPrice ? 'best-price' : ''} ${isSelected ? 'selected' : ''} rounded-2xl p-6 shadow-sm animate-slide-up cursor-pointer" 
+                         style="animation-delay: ${index * 0.1}s"
+                         onclick="toggleMedicineSelection('${medicine.id}')"
+                         aria-label="Select ${medicine.name}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="text-lg font-bold text-gray-800">${medicine.name}</h3>
+                                    <div class="stock-indicator ${medicine.stock}"></div>
+                                    ${savings > 0 ? `<span class="savings-badge text-xs text-white px-2 py-1 rounded-full">Save ${savingsPercent}%</span>` : ''}
+                                </div>
+                                
+                                <div class="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                                    <span class="font-medium">₹${medicine.price}</span>
+                                    ${medicine.originalPrice > medicine.price ? `<span class="line-through text-gray-400">₹${medicine.originalPrice}</span>` : ''}
+                                    <span class="capitalize ${getStockClass(medicine.stock)}">${medicine.stock.replace('-', ' ')}</span>
+                                </div>
+                                
+                                <p class="text-sm text-gray-500 mb-2">${medicine.description}</p>
+                                <p class="text-xs text-gray-400">by ${medicine.manufacturer}</p>
+                            </div>
+                            
+                            <div class="ml-4 flex flex-col items-center space-y-2">
+                                <div class="w-12 h-12 ${getPriceBadgeClass(medicine.price)} rounded-full flex items-center justify-center">
+                                    <i class="medicine-icon fas fa-pills text-xl text-white"></i>
+                                </div>
+                                <span class="text-xs font-bold text-gray-600">₹${medicine.price}</span>
+                                ${isSelected ? '<i class="fas fa-check-circle text-blue-600 text-lg"></i>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            console.log('Medicines rendered');
+        }
+
+        // Toggle medicine selection
+        function toggleMedicineSelection(medicineId) {
+            const index = selectedMedicines.indexOf(medicineId);
+            if (index > -1) {
+                selectedMedicines.splice(index, 1);
+                showToast('Medicine removed from selection', 'info');
+            } else {
+                selectedMedicines.push(medicineId);
+                showToast('Medicine added to selection', 'success');
+            }
+
+            renderMedicines();
+            updateSummary();
+        }
+
+        // Update summary
+        function updateSummary() {
+            console.log('Updating summary');
+            const totalCount = medicines.length;
+            const averagePrice = totalCount > 0 ? Math.round(medicines.reduce((sum, m) => sum + m.price, 0) / totalCount) : 0;
+            const selectedCount = selectedMedicines.length;
+
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('averagePrice').textContent = `₹${averagePrice}`;
+            document.getElementById('selectedCount').textContent = selectedCount;
+
+            const summaryList = document.getElementById('summaryList');
+            const proceedButton = document.getElementById('proceedToPay');
+            if (selectedCount > 0) {
+                const selectedMeds = medicines.filter(m => selectedMedicines.includes(m.id));
+                summaryList.innerHTML = `
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Selected Medicines:</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${selectedMeds.map(med => `
+                            <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                                ${med.name} - ₹${med.price}
+                            </span>
+                        `).join('')}
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-semibold text-gray-700">Total Cost:</span>
+                            <span class="text-lg font-bold text-blue-600">₹${selectedMeds.reduce((sum, m) => sum + m.price, 0)}</span>
+                        </div>
+                    </div>
+                `;
+                proceedButton.classList.remove('hidden');
+            } else {
+                summaryList.innerHTML = `
+                    <p class="text-sm text-gray-500 italic">No medicines selected yet. Tap on medicines to select them.</p>
+                `;
+                proceedButton.classList.add('hidden');
+            }
+            console.log('Summary updated:', { totalCount, averagePrice, selectedCount });
+        }
+
+        // Proceed to payment
+        function proceedToPayment() {
+            if (selectedMedicines.length === 0) {
+                showToast('Please select at least one medicine', 'error');
+                return;
+            }
+            const selectedMeds = medicines.filter(m => selectedMedicines.includes(m.id));
+            sessionStorage.setItem('selectedMedicines', JSON.stringify(selectedMeds));
+            console.log('Proceeding to payment with:', selectedMeds);
+            window.location.href = 'pay.html';
+        }
+
+        // Search medicines
+        function searchMedicines() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            console.log('Searching medicines with query:', query);
+
+            if (query === '') {
+                filteredMedicines = [...medicines];
+            } else {
+                filteredMedicines = medicines.filter(medicine => 
+                    medicine.name.toLowerCase().includes(query) ||
+                    medicine.description.toLowerCase().includes(query) ||
+                    medicine.manufacturer.toLowerCase().includes(query)
+                );
+            }
+
+            renderMedicines();
+        }
+
+        // Clear search
+        function clearSearch() {
+            console.log('Clearing search');
+            document.getElementById('searchInput').value = '';
+            filteredMedicines = [...medicines];
+            renderMedicines();
+        }
+
+        // Sort by price
+        function sortByPrice(order) {
+            console.log('Sorting by price:', order);
+            if (order === 'low') {
+                filteredMedicines.sort((a, b) => a.price - b.price);
+                showToast('Sorted by lowest price first', 'info');
+            } else {
+                filteredMedicines.sort((a, b) => b.price - a.price);
+                showToast('Sorted by highest price first', 'info');
+            }
+
+            renderMedicines();
+        }
+
+        // Add new medicine
+        function addNewMedicine() {
+            console.log('Opening add medicine modal');
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-sm w-full animate-scale-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Add New Medicine</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700" aria-label="Close modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Medicine Name</label>
+                            <input type="text" id="newMedicineName" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter medicine name" aria-label="Medicine name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
+                            <input type="number" id="newMedicinePrice" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter price" aria-label="Medicine price">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <input type="text" id="newMedicineDescription" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter description" aria-label="Medicine description">
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold" aria-label="Cancel">
+                            Cancel
+                        </button>
+                        <button onclick="saveMedicine()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold" aria-label="Add medicine">
+                            Add Medicine
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        // Save new medicine
+        function saveMedicine() {
+            const name = document.getElementById('newMedicineName').value.trim();
+            const price = parseFloat(document.getElementById('newMedicinePrice').value);
+            const description = document.getElementById('newMedicineDescription').value.trim();
+
+            if (!name || !price || !description) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            const newMedicine = {
+                id: `MED${Date.now()}`,
+                name: name,
+                price: price,
+                originalPrice: price + 10,
+                stock: 'in-stock',
+                manufacturer: 'Custom Entry',
+                description: description
+            };
+
+            medicines.push(newMedicine);
+            filteredMedicines = [...medicines];
+            renderMedicines();
+            updateSummary();
+
+            document.querySelector('.fixed').remove();
+            showToast('Medicine added successfully!', 'success');
+            console.log('Medicine added:', newMedicine);
+        }
+
+        // Upload prescription
+        async function uploadPrescription() {
+            showToast('Opening file picker...', 'info');
+            console.log('Opening file picker for prescription upload');
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*,.pdf';
+            fileInput.multiple = true;
+
+            fileInput.onchange = async function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) {
+                    showToast('No files selected', 'error');
+                    return;
+                }
+
+                showToast(`Uploading ${files.length} file(s)...`, 'info');
+                console.log('Uploading files:', files.map(f => f.name));
+
+                try {
+                    const formData = new FormData();
+                    files.forEach(file => formData.append('files', file));
+
+                    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.upload}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    console.log('Upload response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Upload failed! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Upload response data:', data);
+                    showToast('Prescription uploaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Error uploading prescription:', error);
+                    showToast('Failed to upload prescription', 'error');
+                }
+            };
+
+            fileInput.click();
+        }
+
+        // Utility functions
+        function getPriceBadgeClass(price) {
+            if (price <= 40) return 'price-badge-low';
+            if (price <= 50) return 'price-badge-medium';
+            return 'price-badge-high';
+        }
+
+        function getStockClass(stock) {
+            switch (stock) {
+                case 'in-stock': return 'text-green-600';
+                case 'low-stock': return 'text-yellow-600';
+                case 'out-of-stock': return 'text-red-600';
+                default: return 'text-gray-600';
+            }
+        }
+
+        // State management
+        function showLoadingState() {
+            console.log('Showing loading state');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('medicinesList').innerHTML = document.getElementById('loadingState').outerHTML;
+        }
+
+        function hideLoadingState() {
+            console.log('Hiding loading state');
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+
+        function showEmptyState() {
+            console.log('Showing empty state');
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('medicinesList').innerHTML = '';
+        }
+
+        function hideEmptyState() {
+            console.log('Hiding empty state');
+            document.getElementById('emptyState').classList.add('hidden');
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            console.log('Showing toast:', message, type);
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-xl text-white font-medium shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.innerHTML = `<div class="flex items-center space-x-2"><span>${message}</span></div>`;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+                console.log('Toast removed');
+            }, 3000);
+        }
+
+        // Navigation functions
+        function goBack() {
+            console.log('Go back clicked');
+            if (confirm('Go back? Your selections will be lost.')) {
+                window.history.back();
+            }
+        }
+
+        function showFilters() {
+            console.log('Filters clicked');
+            showToast('Advanced filters coming soon!', 'info');
+        }
+    </script>
+</body>
+</html>
