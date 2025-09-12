@@ -5,6 +5,9 @@ from app.api.endpoints import auth, doctor, patient, translate
 
 Base.metadata.create_all(bind=engine)
 
+app = FastAPI()
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Change this in production
@@ -12,8 +15,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app = FastAPI()
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(doctor.router, prefix="/doctor", tags=["doctor"])
