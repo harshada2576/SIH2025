@@ -1,7 +1,3 @@
-Got it ✅
-Here’s a **well-structured Markdown version** of your app flow that you can directly put inside your **GitHub `docs/` folder** for SIH.
-
-```markdown
 # Telemedicine & Medical Assistance App – SIH Project
 
 This document explains the **user flow and screen structure** of our mobile application prototype.  
