@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Summary - Patient Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+       
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+       
+        .medical-container {
+            max-width: 414px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+       
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+       
+        .btn-analyze {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+       
+        .medical-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e5e7eb;
+        }
+       
+        .medical-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .scroll-container {
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+       
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+       
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+       
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+       
+        .symptom-input {
+            resize: none;
+            min-height: 120px;
+        }
+       
+        .condition-card {
+            background: linear-gradient(135deg, #fef7cd 0%, #fef3c7 100%);
+            border-left: 4px solid #f59e0b;
+        }
+       
+        .action-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #3b82f6;
+        }
+       
+        .prescription-card {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-left: 4px solid #10b981;
+        }
+       
+        .blood-group-badge {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #f87171;
+        }
+       
+        .allergy-badge {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+       
+        .medication-badge {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
+            border: 1px solid #6366f1;
+        }
+       
+        .chatbot-message {
+            animation: slideUp 0.5s ease-out;
+        }
+       
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+        }
+       
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #9ca3af;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+       
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+       
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+       
+        .request-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e5e7eb;
+        }
+       
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+       
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="medical-container mx-auto shadow-2xl">
+       
+        <!-- Header -->
+        <div class="px-6 pt-12 pb-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Medical Summary</h1>
+                    <p class="text-white/80 text-sm">Your Health Dashboard</p>
+                </div>
+                <button onclick="refreshData()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i id="refreshIcon" class="fas fa-sync-alt text-white"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Content Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="scroll-container px-6 pt-8 pb-6">
+               
+                <!-- Loading State -->
+                <div id="loadingState" class="animate-fade-in">
+                    <div class="space-y-6">
+                        <div class="medical-card bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="loading-skeleton h-6 w-48 mb-4 rounded"></div>
+                            <div class="space-y-3">
+                                <div class="loading-skeleton h-4 w-full rounded"></div>
+                                <div class="loading-skeleton h-4 w-3/4 rounded"></div>
+                                <div class="loading-skeleton h-4 w-1/2 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="medical-card bg-white rounded-2xl p-6 shadow-sm">
+                            <div class="loading-skeleton h-6 w-32 mb-4 rounded"></div>
+                            <div class="loading-skeleton h-24 w-full rounded"></div>
+                        </div>
+                    </div>
+                </div>
+               
+                <!-- Medical Summary Content -->
+                <div id="medicalContent" class="hidden animate-fade-in">
+                   
+                    <!-- Patient Basic Info -->
+                    <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-user-circle text-blue-600 mr-3"></i>
+                                Patient Information
+                            </h2>
+                            <div id="bloodGroupBadge" class="blood-group-badge px-4 py-2 rounded-full font-bold text-sm">
+                                O+ Blood
+                            </div>
+                        </div>
+                       
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">Patient ID:</span>
+                                <p id="patientId" class="font-semibold text-gray-800">PAT-12345</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Last Updated:</span>
+                                <p id="lastUpdated" class="font-semibold text-gray-800">Today</p>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Medical History Section -->
+                    <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-history text-red-600 mr-3"></i>
+                            Medical History
+                        </h2>
+                       
+                        <!-- Allergies -->
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                                Allergies
+                            </h3>
+                            <div id="allergiesList" class="flex flex-wrap gap-2">
+                                <!-- Allergies will be populated here -->
+                            </div>
+                        </div>
+                       
+                        <!-- Past Illnesses -->
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-notes-medical text-blue-500 mr-2"></i>
+                                Past Illnesses
+                            </h3>
+                            <div id="pastIllnessesList" class="space-y-2">
+                                <!-- Past illnesses will be populated here -->
+                            </div>
+                        </div>
+                       
+                        <!-- Current Medications -->
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-pills text-purple-500 mr-2"></i>
+                                Current Medications
+                            </h3>
+                            <div id="medicationsList" class="flex flex-wrap gap-2">
+                                <!-- Medications will be populated here -->
+                            </div>
+                        </div>
+                       
+                        <!-- Family History -->
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-users text-green-500 mr-2"></i>
+                                Family History
+                            </h3>
+                            <div id="familyHistoryText" class="text-gray-600 text-sm leading-relaxed">
+                                <!-- Family history will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Symptom Input Section -->
+                    <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-stethoscope text-teal-600 mr-3"></i>
+                            Current Symptoms
+                        </h2>
+                       
+                        <div class="mb-4">
+                            <label for="symptomsInput" class="block text-sm font-medium text-gray-700 mb-2">
+                                Describe your symptoms in detail:
+                            </label>
+                            <textarea
+                                id="symptomsInput"
+                                class="symptom-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="e.g., I have been experiencing headaches for the past 3 days, along with mild fever and fatigue..."
+                            ></textarea>
+                        </div>
+                       
+                        <button onclick="analyzeSymptoms()" class="btn-analyze w-full text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2">
+                            <i class="fas fa-brain"></i>
+                            <span>ANALYZE SYMPTOMS</span>
+                        </button>
+                    </div>
+                   
+                    <!-- AI Analysis Loading -->
+                    <div id="analysisLoading" class="hidden medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-robot text-blue-600 text-2xl animate-pulse"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800 mb-2">AI Analysis in Progress</h3>
+                            <p class="text-gray-600 text-sm mb-4">Our medical AI is analyzing your symptoms...</p>
+                            <div class="typing-indicator space-x-1">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Chatbot Suggestions Section -->
+                    <div id="suggestionsSection" class="hidden animate-fade-in">
+                        <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-robot text-indigo-600 mr-3"></i>
+                                AI Health Analysis
+                            </h2>
+                           
+                            <!-- Possible Conditions -->
+                            <div class="mb-6">
+                                <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-search-plus text-orange-500 mr-2"></i>
+                                    Possible Conditions
+                                </h3>
+                                <div id="conditionsList" class="space-y-3">
+                                    <!-- Conditions will be populated here -->
+                                </div>
+                            </div>
+                           
+                            <!-- Recommended Actions -->
+                            <div>
+                                <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>
+                                    Recommended Actions
+                                </h3>
+                                <div id="actionsList" class="space-y-3">
+                                    <!-- Actions will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Prescription Section -->
+                    <div id="prescriptionSection" class="hidden animate-fade-in">
+                        <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-prescription-bottle-alt text-green-600 mr-3"></i>
+                                Current Prescription
+                            </h2>
+                           
+                            <div id="prescriptionList" class="space-y-4">
+                                <!-- Prescription items will be populated here -->
+                            </div>
+                           
+                            <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-info-circle text-yellow-600 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-yellow-800 mb-1">Important Note</h4>
+                                        <p class="text-yellow-700 text-sm">
+                                            This prescription is AI-generated based on your symptoms. Please consult with a healthcare professional before taking any medication.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Pending Requests Section -->
+                    <div class="medical-card bg-white rounded-2xl p-6 shadow-sm mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-clipboard-check text-purple-600 mr-3"></i>
+                            Pending Requests
+                        </h2>
+                        <div id="requestsList" class="space-y-4">
+                            <!-- Requests will be populated here -->
+                        </div>
+                        <div id="requestsEmpty" class="hidden text-center py-4">
+                            <p class="text-gray-500 text-sm">No pending requests at the moment.</p>
+                        </div>
+                    </div>
+                   
+                    <!-- Emergency Contact -->
+                    <div class="medical-card bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm mb-6">
+                        <h2 class="text-lg font-bold text-red-800 mb-3 flex items-center">
+                            <i class="fas fa-phone-alt text-red-600 mr-3"></i>
+                            Emergency Contact
+                        </h2>
+                        <p class="text-red-700 text-sm mb-4">
+                            If you're experiencing severe symptoms or a medical emergency, contact emergency services immediately.
+                        </p>
+                        <button onclick="callEmergency()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-colors">
+                            CALL EMERGENCY: 911
+                        </button>
+                    </div>
+                </div>
+               
+                <!-- Error State -->
+                <div id="errorState" class="hidden text-center py-16 animate-fade-in">
+                    <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Unable to Load Medical Data</h3>
+                    <p id="errorMessage" class="text-gray-600 mb-8">Using dummy data as fallback. Last updated: <span id="fallbackTimestamp"></span>. Please try again.</p>
+                    <button onclick="loadMedicalData()" class="btn-primary text-white px-8 py-3 rounded-2xl font-semibold">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let medicalData = null;
+        let isAnalyzing = false;
+        let requestsData = [];
+       
+        // Dummy data fallback
+        const dummyMedicalData = {
+            patientId: 'PAT-12345',
+            bloodGroup: 'O+',
+            lastUpdated: new Date().toISOString(),
+            allergies: ['Penicillin', 'Peanuts'],
+            pastIllnesses: [{ condition: 'Flu', year: '2023' }, { condition: 'Asthma', year: '2020' }],
+            medications: ['Paracetamol', 'Salbutamol'],
+            familyHistory: 'Mother has hypertension, father has diabetes.',
+            symptoms: 'Occasional headaches and fatigue.',
+            suggestions: {
+                conditions: [{ name: 'Tension Headache', probability: '75%', description: 'Likely due to stress or dehydration.' }],
+                actions: [{ title: 'Hydrate', description: 'Drink 2-3 liters of water daily.', urgency: 'low' }]
+            },
+            prescription: [
+                { name: 'Ibuprofen', dosage: '200mg', frequency: 'Every 6 hours', instructions: 'Take with food.', duration: '3 days' }
+            ]
+        };
+       
+        const dummyRequests = [
+            { id: 'REQ-001', patientName: 'Alice Johnson', requestType: 'Consultation', details: 'Request for follow-up consultation.' },
+            { id: 'REQ-002', patientName: 'Bob Smith', requestType: 'Data Access', details: 'Request to access medical records.' }
+        ];
+       
+        // Load medical data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMedicalData();
+        });
+       
+        // Load medical data from API
+        async function loadMedicalData() {
+            try {
+                showLoadingState();
+               
+                // Get patient ID from URL parameters or use default
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId') || localStorage.getItem('patientId') || '1';
+               
+                // API calls to backend
+                const [medicalResponse, requestsResponse] = await Promise.all([
+                    fetch(`http://localhost:8000/api/patients/${patientId}/medical-summary`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                        }
+                    }),
+                    fetch(`http://localhost:8000/api/requests/pending?patientId=${patientId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                        }
+                    })
+                ]);
+               
+                let medicalResult, requestsResult;
+                if (medicalResponse.ok && requestsResponse.ok) {
+                    medicalResult = await medicalResponse.json();
+                    requestsResult = await requestsResponse.json();
+                } else {
+                    throw new Error('Failed to fetch data from backend');
+                }
+               
+                if (medicalResult.success && medicalResult.data) {
+                    medicalData = medicalResult.data;
+                } else {
+                    throw new Error(medicalResult.message || 'Failed to load medical data');
+                }
+               
+                if (requestsResult.success && requestsResult.data) {
+                    requestsData = requestsResult.data.requests || [];
+                } else {
+                    throw new Error(requestsResult.message || 'Failed to load requests');
+                }
+               
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback to dummy data
+                medicalData = dummyMedicalData;
+                requestsData = dummyRequests;
+                document.getElementById('fallbackTimestamp').textContent = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+            } finally {
+                populateMedicalData(medicalData);
+                populateRequests();
+                showMedicalContent();
+            }
+        }
+       
+        // Populate medical data
+        function populateMedicalData(data) {
+            // Basic patient info
+            document.getElementById('patientId').textContent = data.patientId || 'PAT-12345';
+            document.getElementById('lastUpdated').textContent = formatDate(data.lastUpdated) || 'Today';
+            document.getElementById('bloodGroupBadge').textContent = `${data.bloodGroup || 'O+'} Blood`;
+           
+            // Allergies
+            const allergiesList = document.getElementById('allergiesList');
+            if (data.allergies && data.allergies.length > 0) {
+                allergiesList.innerHTML = data.allergies.map(allergy =>
+                    `<span class="allergy-badge px-3 py-1 rounded-full text-sm font-medium">${allergy}</span>`
+                ).join('');
+            } else {
+                allergiesList.innerHTML = '<span class="text-gray-500 text-sm">No known allergies</span>';
+            }
+           
+            // Past illnesses
+            const pastIllnessesList = document.getElementById('pastIllnessesList');
+            if (data.pastIllnesses && data.pastIllnesses.length > 0) {
+                pastIllnessesList.innerHTML = data.pastIllnesses.map(illness =>
+                    `<div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <i class="fas fa-circle text-gray-400" style="font-size: 6px;"></i>
+                        <span>${illness.condition || illness}</span>
+                        ${illness.year ? `<span class="text-gray-400">(${illness.year})</span>` : ''}
+                    </div>`
+                ).join('');
+            } else {
+                pastIllnessesList.innerHTML = '<span class="text-gray-500 text-sm">No significant past illnesses</span>';
+            }
+           
+            // Current medications
+            const medicationsList = document.getElementById('medicationsList');
+            if (data.medications && data.medications.length > 0) {
+                medicationsList.innerHTML = data.medications.map(medication =>
+                    `<span class="medication-badge px-3 py-1 rounded-full text-sm font-medium">${medication.name || medication}</span>`
+                ).join('');
+            } else {
+                medicationsList.innerHTML = '<span class="text-gray-500 text-sm">No current medications</span>';
+            }
+           
+            // Family history
+            const familyHistoryText = document.getElementById('familyHistoryText');
+            if (data.familyHistory) {
+                familyHistoryText.textContent = data.familyHistory;
+            } else {
+                familyHistoryText.innerHTML = '<span class="text-gray-500">No significant family history recorded</span>';
+            }
+           
+            // Pre-populate symptoms if available
+            if (data.symptoms) {
+                document.getElementById('symptomsInput').value = data.symptoms;
+            }
+           
+            // Show suggestions if available
+            if (data.suggestions) {
+                populateSuggestions(data.suggestions);
+                document.getElementById('suggestionsSection').classList.remove('hidden');
+            }
+           
+            // Show prescription if available
+            if (data.prescription && data.prescription.length > 0) {
+                populatePrescription(data.prescription);
+                document.getElementById('prescriptionSection').classList.remove('hidden');
+            }
+        }
+       
+        // Populate requests
+        function populateRequests() {
+            const requestsList = document.getElementById('requestsList');
+            const requestsEmpty = document.getElementById('requestsEmpty');
+           
+            if (requestsData.length === 0) {
+                requestsList.innerHTML = '';
+                requestsEmpty.classList.remove('hidden');
+                return;
+            }
+           
+            requestsEmpty.classList.add('hidden');
+           
+            requestsList.innerHTML = requestsData.map(request => `
+                <div class="request-card bg-white rounded-2xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-1">${request.patientName}</h3>
+                            <p class="text-sm text-gray-600">${request.requestType}</p>
+                            <p class="text-sm text-gray-500 mt-1">${request.details}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="approveRequest('${request.id}')" class="btn-approve text-white px-3 py-1 rounded-lg text-xs font-medium">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="rejectRequest('${request.id}')" class="btn-reject text-white px-3 py-1 rounded-lg text-xs font-medium">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+       
+        // Analyze symptoms with AI
+        async function analyzeSymptoms() {
+            const symptomsInput = document.getElementById('symptomsInput');
+            const symptoms = symptomsInput.value.trim();
+           
+            if (!symptoms) {
+                showToast('Please describe your symptoms first.', 'warning');
+                return;
+            }
+           
+            if (isAnalyzing) {
+                return;
+            }
+           
+            try {
+                isAnalyzing = true;
+                showAnalysisLoading();
+               
+                const response = await fetch('http://localhost:8000/api/ai/analyze-symptoms', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    },
+                    body: JSON.stringify({
+                        symptoms: symptoms,
+                        patientId: medicalData?.patientId,
+                        medicalHistory: {
+                            bloodGroup: medicalData?.bloodGroup,
+                            allergies: medicalData?.allergies,
+                            pastIllnesses: medicalData?.pastIllnesses,
+                            medications: medicalData?.medications,
+                            familyHistory: medicalData?.familyHistory
+                        }
+                    })
+                });
+               
+                if (!response.ok) {
+                    throw new Error('Failed to analyze symptoms');
+                }
+               
+                const result = await response.json();
+               
+                if (result.success && result.data) {
+                    hideAnalysisLoading();
+                   
+                    if (result.data.suggestions) {
+                        populateSuggestions(result.data.suggestions);
+                        document.getElementById('suggestionsSection').classList.remove('hidden');
+                    }
+                   
+                    if (result.data.prescription) {
+                        populatePrescription(result.data.prescription);
+                        document.getElementById('prescriptionSection').classList.remove('hidden');
+                    }
+                   
+                    showToast('Analysis complete! Check the recommendations below.', 'success');
+                } else {
+                    throw new Error(result.message || 'Analysis failed');
+                }
+               
+            } catch (error) {
+                console.error('Error analyzing symptoms:', error);
+                hideAnalysisLoading();
+                showToast('Failed to analyze symptoms. Please try again.', 'error');
+            } finally {
+                isAnalyzing = false;
+            }
+        }
+       
+        // Approve request
+        async function approveRequest(requestId) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    requestsData = requestsData.filter(req => req.id !== requestId);
+                    populateRequests();
+                    showToast('Request approved successfully!', 'success');
+                } else {
+                    throw new Error('Failed to approve request');
+                }
+            } catch (error) {
+                console.error('Error approving request:', error);
+                showToast('Failed to approve request. Please try again.', 'error');
+            }
+        }
+       
+        // Reject request
+        async function rejectRequest(requestId) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+                    }
+                });
+               
+                if (response.ok) {
+                    requestsData = requestsData.filter(req => req.id !== requestId);
+                    populateRequests();
+                    showToast('Request rejected.', 'info');
+                } else {
+                    throw new Error('Failed to reject request');
+                }
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+                showToast('Failed to reject request. Please try again.', 'error');
+            }
+        }
+       
+        // Populate AI suggestions
+        function populateSuggestions(suggestions) {
+            // Populate conditions
+            const conditionsList = document.getElementById('conditionsList');
+            if (suggestions.conditions && suggestions.conditions.length > 0) {
+                conditionsList.innerHTML = suggestions.conditions.map(condition =>
+                    `<div class="condition-card p-4 rounded-xl">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-search-plus text-orange-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">${condition.name || condition}</h4>
+                                ${condition.probability ? `<p class="text-sm text-gray-600 mb-2">Probability: ${condition.probability}%</p>` : ''}
+                                ${condition.description ? `<p class="text-sm text-gray-600">${condition.description}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>`
+                ).join('');
+            } else {
+                conditionsList.innerHTML = '<p class="text-gray-500 text-sm">No specific conditions identified</p>';
+            }
+           
+            // Populate actions
+            const actionsList = document.getElementById('actionsList');
+            if (suggestions.actions && suggestions.actions.length > 0) {
+                actionsList.innerHTML = suggestions.actions.map(action =>
+                    `<div class="action-card p-4 rounded-xl">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clipboard-list text-blue-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">${action.title || action}</h4>
+                                ${action.description ? `<p class="text-sm text-gray-600">${action.description}</p>` : ''}
+                                ${action.urgency ? `<span class="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full ${action.urgency === 'high' ? 'bg-red-100 text-red-800' : action.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${action.urgency.toUpperCase()} PRIORITY</span>` : ''}
+                            </div>
+                        </div>
+                    </div>`
+                ).join('');
+            } else {
+                actionsList.innerHTML = '<p class="text-gray-500 text-sm">No specific actions recommended</p>';
+            }
+        }
+       
+        // Populate prescription
+        function populatePrescription(prescription) {
+            const prescriptionList = document.getElementById('prescriptionList');
+           
+            prescriptionList.innerHTML = prescription.map(medication =>
+                `<div class="prescription-card p-4 rounded-xl">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-pills text-green-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800 mb-1">${medication.name}</h4>
+                            <p class="text-sm text-gray-600 mb-2">
+                                <strong>Dosage:</strong> ${medication.dosage || 'As prescribed'}
+                            </p>
+                            <p class="text-sm text-gray-600 mb-2">
+                                <strong>Frequency:</strong> ${medication.frequency || 'As needed'}
+                            </p>
+                            ${medication.instructions ? `
+                                <p class="text-sm text-gray-600">
+                                    <strong>Instructions:</strong> ${medication.instructions}
+                                </p>
+                            ` : ''}
+                            ${medication.duration ? `
+                                <p class="text-sm text-gray-500 mt-2">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Duration: ${medication.duration}
+                                </p>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>`
+            ).join('');
+        }
+       
+        // State management functions
+        function showLoadingState() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('medicalContent').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+        }
+       
+        function showMedicalContent() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('medicalContent').classList.remove('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+        }
+       
+        function showErrorState() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('medicalContent').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+       
+        function showAnalysisLoading() {
+            document.getElementById('analysisLoading').classList.remove('hidden');
+            document.getElementById('suggestionsSection').classList.add('hidden');
+        }
+       
+        function hideAnalysisLoading() {
+            document.getElementById('analysisLoading').classList.add('hidden');
+        }
+       
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return null;
+           
+            const date = new Date(dateString);
+            const today = new Date();
+            const diffTime = Math.abs(today - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+           
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+           
+            return date.toLocaleDateString();
+        }
+       
+        function refreshData() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('animate-spin');
+           
+            loadMedicalData().finally(() => {
+                setTimeout(() => {
+                    refreshIcon.classList.remove('animate-spin');
+                }, 1000);
+            });
+        }
+       
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg text-white font-medium ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' :
+                type === 'info' ? 'bg-blue-500' : 'bg-gray-500'
+            }`;
+            toast.textContent = message;
+           
+            document.body.appendChild(toast);
+           
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+       
+        function callEmergency() {
+            if (confirm('This will call emergency services (911). Do you want to proceed?')) {
+                window.location.href = 'tel:911';
+            }
+        }
+       
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dfd82b045a47cd',t:'MTc1NzY4NDcxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
