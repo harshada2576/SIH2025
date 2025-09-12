@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Profile - Healthcare Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-gentle': 'pulseGentle 2s infinite',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @keyframes pulseGentle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+       
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+       
+        .profile-container {
+            max-width: 414px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+       
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+       
+        .btn-secondary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: all 0.3s ease;
+        }
+       
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+       
+        .profile-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+       
+        .info-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+       
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .scroll-container {
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+       
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+       
+        .star-rating {
+            color: #fbbf24;
+        }
+       
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+       
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+       
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Mobile App Container -->
+    <div class="profile-container mx-auto shadow-2xl">
+       
+        <!-- Header -->
+        <div class="px-6 pt-12 pb-6 text-white">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="goBack()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold mb-1">Doctor Profile</h1>
+                    <p class="text-white/80 text-sm">Healthcare Professional</p>
+                </div>
+                <button onclick="toggleFavorite()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                    <i id="favoriteIcon" class="far fa-heart text-white"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Profile Container -->
+        <div class="bg-white rounded-t-3xl min-h-screen">
+            <div class="scroll-container px-6 pt-8 pb-6">
+               
+                <!-- Loading State -->
+                <div id="loadingState" class="animate-fade-in">
+                    <div class="text-center mb-8">
+                        <div class="profile-photo rounded-full mx-auto mb-4 loading-skeleton"></div>
+                        <div class="loading-skeleton h-6 w-48 mx-auto mb-2 rounded"></div>
+                        <div class="loading-skeleton h-4 w-32 mx-auto rounded"></div>
+                    </div>
+                   
+                    <div class="space-y-4 mb-8">
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="loading-skeleton h-4 w-full mb-2 rounded"></div>
+                            <div class="loading-skeleton h-4 w-3/4 rounded"></div>
+                        </div>
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="loading-skeleton h-4 w-full mb-2 rounded"></div>
+                            <div class="loading-skeleton h-4 w-2/3 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+               
+                <!-- Profile Content -->
+                <div id="profileContent" class="hidden animate-fade-in">
+                    <!-- Profile Photo & Basic Info -->
+                    <div class="text-center mb-8">
+                        <div class="profile-photo rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                            <img id="profilePhoto" src="" alt="Doctor Photo" class="w-full h-full object-cover rounded-full hidden">
+                            <i id="profilePlaceholder" class="fas fa-user-md text-white text-4xl"></i>
+                        </div>
+                        <h2 id="doctorName" class="text-2xl font-bold text-gray-800 mb-1">Dr. Name</h2>
+                        <p id="doctorQualification" class="text-gray-600 mb-3">Qualification</p>
+                       
+                        <!-- Rating -->
+                        <div class="flex items-center justify-center space-x-2 mb-2">
+                            <div id="starRating" class="flex items-center space-x-1">
+                                <!-- Stars will be populated by JavaScript -->
+                            </div>
+                            <span id="ratingValue" class="text-gray-600 font-medium">0.0</span>
+                        </div>
+                       
+                        <!-- Experience -->
+                        <div class="flex items-center justify-center space-x-2 text-gray-600">
+                            <i class="fas fa-calendar-alt text-blue-500"></i>
+                            <span id="experienceYears">0 years experience</span>
+                        </div>
+                    </div>
+                   
+                    <!-- Contact Information -->
+                    <div class="space-y-4 mb-8">
+                        <!-- Phone -->
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-phone text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-1">Contact Number</h3>
+                                    <p id="contactNumber" class="text-gray-600">Not available</p>
+                                </div>
+                                <button onclick="callDoctor()" class="p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-phone text-blue-600"></i>
+                                </button>
+                            </div>
+                        </div>
+                       
+                        <!-- Email -->
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-envelope text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-1">Email Address</h3>
+                                    <p id="emailAddress" class="text-gray-600">Not available</p>
+                                </div>
+                                <button onclick="emailDoctor()" class="p-2 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-envelope text-green-600"></i>
+                                </button>
+                            </div>
+                        </div>
+                       
+                        <!-- Clinic/Hospital -->
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-hospital text-purple-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-1">Hospital/Clinic</h3>
+                                    <p id="hospitalName" class="text-gray-600">Not available</p>
+                                </div>
+                            </div>
+                        </div>
+                       
+                        <!-- Address -->
+                        <div class="info-card bg-white rounded-2xl p-4 shadow-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-red-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-1">Clinic Address</h3>
+                                    <p id="clinicAddress" class="text-gray-600">Not available</p>
+                                </div>
+                                <button onclick="openMaps()" class="p-2 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                    <i class="fas fa-directions text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- About/Bio Section -->
+                    <div class="info-card bg-white rounded-2xl p-6 shadow-sm mb-8">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-circle text-blue-600 mr-2Die"></i>
+                            About Doctor
+                        </h3>
+                        <p id="doctorBio" class="text-gray-600 leading-relaxed">No bio available.</p>
+                    </div>
+                   
+                    <!-- Practice Information -->
+                    <div class="info-card bg-white rounded-2xl p-6 shadow-sm mb-8">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-stethoscope text-green-600 mr-2"></i>
+                            Practice Information
+                        </h3>
+                        <div id="practiceInfo" class="text-gray-600 leading-relaxed">
+                            <p class="mb-2"><strong>Specialization:</strong> Not available</p>
+                            <p class="mb-2"><strong>Consultation Hours:</strong> Not available</p>
+                            <p class="mb-2"><strong>Languages:</strong> Not available</p>
+                            <p><strong>Consultation Fee:</strong> Not available</p>
+                        </div>
+                    </div>
+                   
+                    <!-- Action Buttons -->
+                    <div class="space-y-4 mb-8">
+                        <button onclick="bookAppointment()" class="w-full btn-primary text-white py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span>BOOK APPOINTMENT</span>
+                        </button>
+                       
+                        <button onclick="consultOnline()" class="w-full btn-secondary text-white py-4 rounded-2xl font-semibold text-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-video"></i>
+                            <span>CONSULT ONLINE</span>
+                        </button>
+                    </div>
+                   
+                    <!-- Additional Actions -->
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <button onclick="shareProfile()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Share</span>
+                        </button>
+                       
+                        <button onclick="writeReview()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2">
+                            <i class="fas fa-star"></i>
+                            <span>Review</span>
+                        </button>
+                    </div>
+                </div>
+               
+                <!-- Error State -->
+                <div id="errorState" class="hidden text-center py-16 animate-fade-in">
+                    <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Unable to Load Profile</h3>
+                    <p class="text-gray-600 mb-8">There was an error loading the doctor's profile. Please try again.</p>
+                    <button onclick="loadDoctorProfile()" class="btn-primary text-white px-8 py-3 rounded-2xl font-semibold">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let doctorData = null;
+        let isFavorite = false;
+
+        // Sample doctor data (matching listofdocavailable.html for demo mode)
+        const sampleDoctors = [
+            {
+                id: 1,
+                name: "Dr. Sarah Johnson",
+                specialty: "Cardiologist",
+                rating: 4.8,
+                patients: 1250,
+                qualification: "MBBS, MD Cardiology",
+                experience: "15 years",
+                location: "Downtown Medical Center",
+                avatar: "👩‍⚕️",
+                about: "Specialized in heart diseases and cardiac surgery.",
+                availability: "Available Today",
+                phone: "+1 (555) 123-4567",
+                email: "sarah.johnson@hospital.com",
+                hospitalName: "Downtown Medical Center",
+                address: "123 Heart St, City, ST 12345",
+                practiceInfo: {
+                    specialization: "Cardiology",
+                    consultationHours: "Mon-Fri 9:00 AM - 5:00 PM",
+                    languages: "English, Spanish",
+                    consultationFee: 150
+                }
+            },
+            {
+                id: 2,
+                name: "Dr. Michael Chen",
+                specialty: "Dermatologist",
+                rating: 4.9,
+                patients: 980,
+                qualification: "MBBS, MD Dermatology",
+                experience: "12 years",
+                location: "Skin Care Clinic",
+                avatar: "👨‍⚕️",
+                about: "Expert in skin conditions, cosmetic procedures.",
+                availability: "Available Tomorrow",
+                phone: "+1 (555) 987-6543",
+                email: "michael.chen@skincare.com",
+                hospitalName: "Skin Care Clinic",
+                address: "456 Skin Ave, City, ST 67890",
+                practiceInfo: {
+                    specialization: "Dermatology",
+                    consultationHours: "Tue-Sat 10:00 AM - 6:00 PM",
+                    languages: "English, Mandarin",
+                    consultationFee: 120
+                }
+            },
+            {
+                id: 3,
+                name: "Dr. Emily Rodriguez",
+                specialty: "Pediatrician",
+                rating: 4.7,
+                patients: 2100,
+                qualification: "MBBS, MD Pediatrics",
+                experience: "10 years",
+                location: "Children's Hospital",
+                avatar: "👩‍⚕️",
+                about: "Comprehensive healthcare for children.",
+                availability: "Available Today",
+                phone: "+1 (555) 456-7890",
+                email: "emily.rodriguez@childrenshospital.org",
+                hospitalName: "Children's Hospital",
+                address: "789 Child Rd, City, ST 11223",
+                practiceInfo: {
+                    specialization: "Pediatrics",
+                    consultationHours: "Mon-Fri 8:00 AM - 4:00 PM",
+                    languages: "English, Spanish",
+                    consultationFee: 100
+                }
+            },
+            {
+                id: 4,
+                name: "Dr. David Kim",
+                specialty: "Orthopedist",
+                rating: 4.6,
+                patients: 850,
+                qualification: "MBBS, MS Orthopedics",
+                experience: "18 years",
+                location: "Bone & Joint Center",
+                avatar: "👨‍⚕️",
+                about: "Specializes in bone, joint, and muscle disorders with advanced surgical techniques.",
+                availability: "Available Today",
+                phone: "+1 (555) 321-6547",
+                email: "david.kim@bonejointcenter.com",
+                hospitalName: "Bone & Joint Center",
+                address: "321 Bone St, City, ST 44556",
+                practiceInfo: {
+                    specialization: "Orthopedics",
+                    consultationHours: "Mon-Fri 9:00 AM - 5:00 PM",
+                    languages: "English, Korean",
+                    consultationFee: 140
+                }
+            },
+            {
+                id: 5,
+                name: "Dr. Lisa Thompson",
+                specialty: "Gynecologist",
+                rating: 4.8,
+                patients: 1400,
+                qualification: "MBBS, MD Gynecology",
+                experience: "14 years",
+                location: "Women's Health Clinic",
+                avatar: "👩‍⚕️",
+                about: "Comprehensive women's healthcare including pregnancy care and reproductive health.",
+                availability: "Available Tomorrow",
+                phone: "+1 (555) 654-3210",
+                email: "lisa.thompson@womenshealth.com",
+                hospitalName: "Women's Health Clinic",
+                address: "654 Women Ave, City, ST 77889",
+                practiceInfo: {
+                    specialization: "Gynecology",
+                    consultationHours: "Mon-Fri 10:00 AM - 6:00 PM",
+                    languages: "English",
+                    consultationFee: 130
+                }
+            },
+            {
+                id: 6,
+                name: "Dr. Robert Wilson",
+                specialty: "Neurologist",
+                rating: 4.9,
+                patients: 750,
+                qualification: "MBBS, DM Neurology",
+                experience: "20 years",
+                location: "Brain & Spine Institute",
+                avatar: "👨‍⚕️",
+                about: "Expert in neurological disorders, brain conditions, and nervous system diseases.",
+                availability: "Available Today",
+                phone: "+1 (555) 789-1234",
+                email: "robert.wilson@brainspine.org",
+                hospitalName: "Brain & Spine Institute",
+                address: "789 Neuro Rd, City, ST 99001",
+                practiceInfo: {
+                    specialization: "Neurology",
+                    consultationHours: "Mon-Fri 8:00 AM - 4:00 PM",
+                    languages: "English",
+                    consultationFee: 160
+                }
+            },
+            {
+                id: 7,
+                name: "Dr. Amanda Davis",
+                specialty: "Ophthalmologist",
+                rating: 4.7,
+                patients: 1100,
+                qualification: "MBBS, MS Ophthalmology",
+                experience: "11 years",
+                location: "Eye Care Center",
+                avatar: "👩‍⚕️",
+                about: "Specialized in eye care, vision correction, and advanced eye surgeries.",
+                availability: "Available Today",
+                phone: "+1 (555) 147-2589",
+                email: "amanda.davis@eyecarecenter.com",
+                hospitalName: "Eye Care Center",
+                address: "147 Vision St, City, ST 33445",
+                practiceInfo: {
+                    specialization: "Ophthalmology",
+                    consultationHours: "Mon-Fri 9:00 AM - 5:00 PM",
+                    languages: "English, Spanish",
+                    consultationFee: 110
+                }
+            }
+        ];
+
+        // Fetch doctor profile from backend
+        async function fetchDoctorFromBackend(doctorId) {
+            try {
+                const response = await fetch(`http://localhost:8000/api/doctors/${doctorId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                return {
+                    doctor: data.data || null,
+                    isDemo: false
+                };
+            } catch (error) {
+                console.error('Error fetching doctor profile:', error);
+                const doctor = sampleDoctors.find(d => d.id === doctorId);
+                return {
+                    doctor: doctor || null,
+                    isDemo: true
+                };
+            }
+        }
+
+        // Load doctor profile on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDoctorProfile();
+        });
+
+        // Load doctor profile
+        async function loadDoctorProfile() {
+            try {
+                showLoadingState();
+               
+                // Get doctor ID from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const doctorId = parseInt(urlParams.get('id')) || 1; // Default to doctor ID 1
+               
+                // Fetch doctor data
+                const { doctor, isDemo } = await fetchDoctorFromBackend(doctorId);
+               
+                if (doctor) {
+                    doctorData = doctor;
+                    populateProfile(doctorData);
+                    showProfileContent();
+                    if (isDemo) {
+                        console.log('Using demo data for doctor profile');
+                    }
+                } else {
+                    throw new Error('Doctor not found');
+                }
+               
+            } catch (error) {
+                console.error('Error loading doctor profile:', error);
+                showErrorState();
+            }
+        }
+       
+        // Populate profile with data
+        function populateProfile(data) {
+            // Basic information
+            document.getElementById('doctorName').textContent = data.name || 'Dr. Name';
+            document.getElementById('doctorQualification').textContent = data.qualification || 'Medical Professional';
+            document.getElementById('experienceYears').textContent = `${data.experience || '0 years'} experience`;
+            document.getElementById('contactNumber').textContent = data.phone || 'Not available';
+            document.getElementById('emailAddress').textContent = data.email || 'Not available';
+            document.getElementById('hospitalName').textContent = data.hospitalName || data.location || 'Not available';
+            document.getElementById('clinicAddress').textContent = data.address || 'Not available';
+           
+            // Rating
+            const rating = data.rating || 4.5;
+            document.getElementById('ratingValue').textContent = rating.toFixed(1);
+            generateStarRating(rating);
+           
+            // Bio
+            document.getElementById('doctorBio').textContent = data.about || 'No bio available.';
+           
+            // Practice information
+            let practiceHtml = '';
+            if (data.specialty) {
+                practiceHtml += `<p class="mb-2"><strong>Specialization:</strong> ${data.specialty}</p>`;
+            }
+            if (data.practiceInfo?.consultationHours) {
+                practiceHtml += `<p class="mb-2"><strong>Consultation Hours:</strong> ${data.practiceInfo.consultationHours}</p>`;
+            } else {
+                practiceHtml += `<p class="mb-2"><strong>Consultation Hours:</strong> Not available</p>`;
+            }
+            if (data.practiceInfo?.languages) {
+                practiceHtml += `<p class="mb-2"><strong>Languages:</strong> ${data.practiceInfo.languages}</p>`;
+            } else {
+                practiceHtml += `<p class="mb-2"><strong>Languages:</strong> Not available</p>`;
+            }
+            if (data.practiceInfo?.consultationFee) {
+                practiceHtml += `<p><strong>Consultation Fee:</strong> $${data.practiceInfo.consultationFee}</p>`;
+            } else {
+                practiceHtml += `<p><strong>Consultation Fee:</strong> Not available</p>`;
+            }
+           
+            document.getElementById('practiceInfo').innerHTML = practiceHtml;
+           
+            // Profile photo (using avatar for now)
+            if (data.avatar) {
+                document.getElementById('profilePlaceholder').textContent = data.avatar;
+                document.getElementById('profilePhoto').classList.add('hidden');
+                document.getElementById('profilePlaceholder').classList.remove('hidden');
+            }
+        }
+       
+        // Generate star rating
+        function generateStarRating(rating) {
+            const starContainer = document.getElementById('starRating');
+            starContainer.innerHTML = '';
+           
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+           
+            // Full stars
+            for (let i = 0; i < fullStars; i++) {
+                const star = document.createElement('i');
+                star.className = 'fas fa-star star-rating';
+                starContainer.appendChild(star);
+            }
+           
+            // Half star
+            if (hasHalfStar) {
+                const halfStar = document.createElement('i');
+                halfStar.className = 'fas fa-star-half-alt star-rating';
+                starContainer.appendChild(halfStar);
+            }
+           
+            // Empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                const emptyStar = document.createElement('i');
+                emptyStar.className = 'far fa-star star-rating';
+                starContainer.appendChild(emptyStar);
+            }
+        }
+       
+        // State management functions
+        function showLoadingState() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('profileContent').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+        }
+       
+        function showProfileContent() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('profileContent').classList.remove('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+        }
+       
+        function showErrorState() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('profileContent').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+       
+        // Action functions
+        function bookAppointment() {
+            if (doctorData) {
+                // Simulate navigation (in real app, redirect to booking page)
+                alert(`Booking appointment with ${doctorData.name}`);
+            } else {
+                alert('Please wait for the profile to load completely.');
+            }
+        }
+       
+        function consultOnline() {
+            if (doctorData) {
+                // Simulate navigation
+                alert(`Starting online consultation with ${doctorData.name}`);
+            } else {
+                alert('Please wait for the profile to load completely.');
+            }
+        }
+       
+        function callDoctor() {
+            if (doctorData && doctorData.phone) {
+                window.location.href = `tel:${doctorData.phone}`;
+            } else {
+                alert('Phone number not available.');
+            }
+        }
+       
+        function emailDoctor() {
+            if (doctorData && doctorData.email) {
+                window.location.href = `mailto:${doctorData.email}`;
+            } else {
+                alert('Email address not available.');
+            }
+        }
+       
+        function openMaps() {
+            if (doctorData && doctorData.address) {
+                const encodedAddress = encodeURIComponent(doctorData.address);
+                window.open(`https://maps.google.com/maps?q=${encodedAddress}`, '_blank');
+            } else {
+                alert('Address not available.');
+            }
+        }
+       
+        function toggleFavorite() {
+            isFavorite = !isFavorite;
+            const icon = document.getElementById('favoriteIcon');
+           
+            if (isFavorite) {
+                icon.classList.remove('far');
+                icon.classList.add('fas', 'text-red-500');
+            } else {
+                icon.classList.remove('fas', 'text-red-500');
+                icon.classList.add('far');
+            }
+           
+            // Here you would typically save the favorite status to backend
+            console.log(`Doctor ${isFavorite ? 'added to' : 'removed from'} favorites`);
+        }
+       
+        function shareProfile() {
+            if (navigator.share && doctorData) {
+                navigator.share({
+                    title: `${doctorData.name}`,
+                    text: `Check out ${doctorData.name}'s profile`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Profile link copied to clipboard!');
+                });
+            }
+        }
+       
+        function writeReview() {
+            if (doctorData) {
+                // Simulate navigation
+                alert(`Writing review for ${doctorData.name}`);
+            } else {
+                alert('Please wait for the profile to load completely.');
+            }
+        }
+       
+        function goBack() {
+            // Navigate back to previous page
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
