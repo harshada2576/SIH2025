@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Page</title>
+    <script
+      src="https://kit.fontawesome.com/c4aaea8549.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+      body {
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .navbar {
+        justify-content: space-between;
+      }
+      .navbar-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .main-logo {
+        height: 45px;
+        width: auto;
+      }
+      #chatOutput {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        margin-bottom: 80px; /* leave space for prompt container */
+      }
+      .message {
+        padding: 8px 12px;
+        margin: 5px 0;
+        border-radius: 10px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+      .message.user {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+      }
+      .message.ai {
+        background-color: #e0e0e0;
+        color: black;
+        align-self: flex-start;
+      }
+      .prompt-container {
+        position: fixed;
+        bottom: 0;
+        z-index: 1000;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        max-width: 600px;
+        margin: 2px auto;
+        border-radius: 12px;
+        background: #f5f5f5;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      #userPrompt {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 10px 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        resize: none;
+        min-height: 40px;
+        max-height: 100px;
+        background: #ffffff;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .mic-btn,
+      .send-btn {
+        border: none;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        transition: 0.3s;
+      }
+      .mic-btn {
+        background: #c7c5c5;
+      }
+      .mic-btn:hover {
+        background: #d32f2f;
+      }
+      .send-btn {
+        background: #007bff;
+      }
+      .send-btn:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar bg-light px-3">
+      <a href="#" class="text-dark fs-4"><i class="fa fa-bars"></i></a>
+      <a href="#" class="navbar-center">
+        <img
+          src="https://tse2.mm.bing.net/th/id/OIP.sU7hHaMwmg9VGlhH9rYFMgHaDF?pid=Api&P=0&h=220"
+          alt="Logo"
+          class="main-logo"
+        />
+      </a>
+      <a href="#" class="text-dark fs-4"><i class="fa fa-info-circle"></i></a>
+    </nav>
+
+    <div id="chatOutput" class="d-flex flex-column"></div>
+
+    <div class="prompt-container">
+      <textarea id="userPrompt" placeholder="Type your message..."></textarea>
+      <button id="micBtn" class="mic-btn">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+      <button id="sendBtn" class="send-btn">➤</button>
+    </div>
+
+    <script>
+      const output = document.getElementById("chatOutput");
+      const textarea = document.getElementById("userPrompt");
+      const sendBtn = document.getElementById("sendBtn");
+      const micBtn = document.getElementById("micBtn");
+
+      function addMessage(sender, text) {
+        const div = document.createElement("div");
+        div.classList.add("message", sender);
+        div.textContent = text;
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+      }
+
+      function simulateAIResponse(userText) {
+        setTimeout(() => {
+          addMessage("ai", "AI Response to: " + userText);
+        }, 500);
+      }
+
+      // Read prompt from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const firstMessage = urlParams.get("message");
+      if (firstMessage) {
+        addMessage("user", firstMessage);
+        simulateAIResponse(firstMessage);
+      }
+
+      sendBtn.addEventListener("click", () => {
+        const text = textarea.value.trim();
+        if (!text) return;
+        textarea.value = "";
+        addMessage("user", text);
+        simulateAIResponse(text);
+      });
+
+      // Speech Recognition (if supported)
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        micBtn.addEventListener("click", () => {
+          recognition.start();
+          micBtn.style.background = "#ffa000";
+        });
+
+        recognition.addEventListener("result", (event) => {
+          const transcript = event.results[0][0].transcript;
+          textarea.value = transcript;
+        });
+
+        recognition.addEventListener("end", () => {
+          micBtn.style.background = "#c7c5c5";
+        });
+      } else {
+        micBtn.addEventListener("click", () => {
+          alert("Speech recognition not supported in this browser.");
+        });
+      }
+    </script>
+  </body>
+</html>

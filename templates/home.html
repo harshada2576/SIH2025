@@ -202,7 +202,10 @@
 
     <div class="container my-2">
       <div class="row g-3">
-        <div class="col-6 col-md-3">
+        <div
+          class="col-6 col-md-3"
+          onclick="window.location.href='doc_cat.html'"
+        >
           <div class="grid-item">
             <img src="doctor-anime-image.webp" class="img-fluid" alt="Item 1" />
             <div class="grid-title">Doctors</div>
@@ -334,8 +337,9 @@
     sendBtn.addEventListener("click", () => {
       const text = textarea.value.trim();
       if (text) {
-        output.innerHTML = `<p><b>You:</b> ${text}</p>`;
         textarea.value = ""; // Clear input after sending
+        window.location.href =
+          "chat_page.html?message=" + encodeURIComponent(text);
       }
     });
   </script>
