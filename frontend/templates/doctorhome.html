@@ -192,6 +192,16 @@
             background: #fee2e2;
             color: #991b1b;
         }
+       
+        .patient-link {
+            color: #3b82f6;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+       
+        .patient-link:hover {
+            color: #1e40af;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-inter">
@@ -432,7 +442,9 @@
                                 <i class="fas fa-user text-blue-600"></i>
                             </div>
                             <div class="flex-1">
-                                <h3 class="font-semibold text-gray-800 mb-1">${appointment.name}</h3>
+                                <h3 class="font-semibold">
+                                    <span onclick="viewPatient('${appointment.id}')" class="patient-link">${appointment.name}</span>
+                                </h3>
                                 <div class="flex items-center space-x-4 text-sm text-gray-600">
                                     <div class="flex items-center space-x-1">
                                         <i class="fas fa-calendar-alt"></i>
@@ -497,7 +509,9 @@
                                 <i class="fas fa-user text-green-600"></i>
                             </div>
                             <div class="flex-1">
-                                <h3 class="font-semibold text-gray-800 mb-1">${patient.name}</h3>
+                                <h3 class="font-semibold">
+                                    <span onclick="viewPatient('${patient.id}')" class="patient-link">${patient.name}</span>
+                                </h3>
                                 <div class="flex items-center space-x-4 text-sm text-gray-600">
                                     <div class="flex items-center space-x-1">
                                         <i class="fas fa-clock"></i>
@@ -746,6 +760,11 @@
                 console.error('Error starting video call:', error);
                 showToast('Failed to start video call. Please try again.', 'error');
             }
+        }
+       
+        // View patient details
+        function viewPatient(patientId) {
+            window.location.href = `patientinfo.html?patientId=${patientId}`;
         }
        
         // Utility functions

@@ -210,7 +210,7 @@
                 </button>
                 <div class="text-center">
                     <h1 class="text-xl font-bold mb-1">Medical Summary</h1>
-                    <p class="text-white/80 text-sm">Your Health Dashboard</p>
+                    <p class="text-white/80 text-sm">Patient Health Dashboard</p>
                 </div>
                 <button onclick="refreshData()" class="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
                     <i id="refreshIcon" class="fas fa-sync-alt text-white"></i>
@@ -730,7 +730,9 @@
         // Approve request
         async function approveRequest(requestId) {
             try {
-                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/approve`, {
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId') || localStorage.getItem('patientId') || '1';
+                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/approve?patientId=${patientId}`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -740,22 +742,29 @@
                 });
                
                 if (response.ok) {
-                    requestsData = requestsData.filter(req => req.id !== requestId);
-                    populateRequests();
-                    showToast('Request approved successfully!', 'success');
+                    const result = await response.json();
+                    if (result.success) {
+                        requestsData = requestsData.filter(req => req.id !== requestId);
+                        populateRequests();
+                        showToast('Request approved successfully!', 'success');
+                    } else {
+                        throw new Error(result.message || 'Failed to process approval');
+                    }
                 } else {
-                    throw new Error('Failed to approve request');
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
             } catch (error) {
                 console.error('Error approving request:', error);
-                showToast('Failed to approve request. Please try again.', 'error');
+                showToast(`Failed to approve request. ${error.message}. Please try again or check your network.`, 'error');
             }
         }
        
         // Reject request
         async function rejectRequest(requestId) {
             try {
-                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/reject`, {
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patientId') || localStorage.getItem('patientId') || '1';
+                const response = await fetch(`http://localhost:8000/api/requests/${requestId}/reject?patientId=${patientId}`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -765,15 +774,20 @@
                 });
                
                 if (response.ok) {
-                    requestsData = requestsData.filter(req => req.id !== requestId);
-                    populateRequests();
-                    showToast('Request rejected.', 'info');
+                    const result = await response.json();
+                    if (result.success) {
+                        requestsData = requestsData.filter(req => req.id !== requestId);
+                        populateRequests();
+                        showToast('Request rejected.', 'info');
+                    } else {
+                        throw new Error(result.message || 'Failed to process rejection');
+                    }
                 } else {
-                    throw new Error('Failed to reject request');
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
             } catch (error) {
                 console.error('Error rejecting request:', error);
-                showToast('Failed to reject request. Please try again.', 'error');
+                showToast(`Failed to reject request. ${error.message}. Please try again or check your network.`, 'error');
             }
         }
        
