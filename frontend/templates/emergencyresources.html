@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Resources</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .emergency-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="emergency-gradient text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="text-center">
+                <div class="text-6xl mb-4">🚨</div>
+                <h1 class="text-4xl font-bold mb-2">Emergency Resources</h1>
+                <p class="text-xl opacity-90">Quick access to important emergency information</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <!-- Emergency Notice -->
+        <div class="bg-red-100 border-l-4 border-red-500 p-6 mb-8 rounded-r-lg">
+            <div class="flex items-center">
+                <div class="text-2xl mr-3">⚠️</div>
+                <div>
+                    <h2 class="text-lg font-semibold text-red-800 mb-1">Important Notice</h2>
+                    <p class="text-red-700">For immediate life-threatening emergencies, call 911 or your local emergency services first.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Resources Grid -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <!-- Video Link 1 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                <div class="bg-gradient-to-r from-red-500 to-red-600 p-6">
+                    <div class="flex items-center text-white">
+                        <div class="text-3xl mr-4">📹</div>
+                        <div>
+                            <h3 class="text-xl font-semibold">Emergency Guide #1</h3>
+                            <p class="opacity-90">Essential emergency information</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Access important emergency procedures and safety information.</p>
+                    <a href="https://youtube.com/shorts/dKM1GnWEQRQ?feature=shared" 
+                       target="_blank" 
+                       class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200">
+                        <span class="mr-2">▶️</span>
+                        Watch Video
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video Link 2 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                <div class="bg-gradient-to-r from-orange-500 to-red-500 p-6">
+                    <div class="flex items-center text-white">
+                        <div class="text-3xl mr-4">🎥</div>
+                        <div>
+                            <h3 class="text-xl font-semibold">Emergency Guide #2</h3>
+                            <p class="opacity-90">Critical safety procedures</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Learn vital emergency response techniques and protocols.</p>
+                    <a href="https://youtube.com/shorts/KdSrLbdwOqE?feature=shared" 
+                       target="_blank" 
+                       class="inline-flex items-center bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200">
+                        <span class="mr-2">▶️</span>
+                        Watch Video
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video Link 3 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-500 p-6">
+                    <div class="flex items-center text-white">
+                        <div class="text-3xl mr-4">📺</div>
+                        <div>
+                            <h3 class="text-xl font-semibold">Emergency Guide #3</h3>
+                            <p class="opacity-90">Preparedness essentials</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Discover key emergency preparedness strategies and tips.</p>
+                    <a href="https://youtube.com/shorts/7s9KZeYUQlo?feature=shared" 
+                       target="_blank" 
+                       class="inline-flex items-center bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200">
+                        <span class="mr-2">▶️</span>
+                        Watch Video
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video Link 4 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                <div class="bg-gradient-to-r from-green-500 to-yellow-500 p-6">
+                    <div class="flex items-center text-white">
+                        <div class="text-3xl mr-4">🎬</div>
+                        <div>
+                            <h3 class="text-xl font-semibold">Emergency Guide #4</h3>
+                            <p class="opacity-90">Advanced emergency skills</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Master advanced emergency response and first aid techniques.</p>
+                    <a href="https://youtube.com/shorts/IgH09f7ssl0?feature=shared" 
+                       target="_blank" 
+                       class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200">
+                        <span class="mr-2">▶️</span>
+                        Watch Video
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <span class="text-3xl mr-3">📋</span>
+                Additional Emergency Resources
+            </h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-4xl mb-3">🚑</div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Emergency Services</h3>
+                    <p class="text-gray-600 text-sm">Call 911 for immediate assistance</p>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-4xl mb-3">🏥</div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Medical Emergency</h3>
+                    <p class="text-gray-600 text-sm">Know your nearest hospital location</p>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-4xl mb-3">🔥</div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Fire Safety</h3>
+                    <p class="text-gray-600 text-sm">Have evacuation plans ready</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-300">Stay safe and prepared. Keep emergency contacts easily accessible.</p>
+            <p class="text-gray-400 text-sm mt-2">Last updated: <span id="currentDate"></span></p>
+        </div>
+    </footer>
+
+    <script>
+        // Display current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+        
+        // Add click tracking for emergency awareness
+        document.querySelectorAll('a[href*="youtube.com"]').forEach(link => {
+            link.addEventListener('click', function() {
+                console.log('Emergency resource accessed:', this.href);
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e49ce6414d8af9',t:'MTc1NzczNDcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
